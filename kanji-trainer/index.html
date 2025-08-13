@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    
+    <!-- App Info -->
+    <title>Kanji Trainer - Japanese Character Learning App</title>
+    <meta name="description" content="Learn Japanese kanji with interactive flashcards and writing practice. Study JLPT N1-N5 level characters with stroke validation and spaced repetition." />
+    <meta name="keywords" content="Japanese, kanji, JLPT, learning, flashcards, writing practice, stroke order" />
+    <meta name="author" content="Kanji Trainer" />
+    
+    <!-- Browser compatibility -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="prefetch" href="/src/components/WritingPractice/WritingPractice.tsx" />
+    <link rel="prefetch" href="/src/components/Flashcards/Flashcards.tsx" />
+    
+    <!-- PWA meta tags -->
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2937" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Kanji Trainer" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Kanji Trainer" />
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="apple-touch-icon" href="/vite.svg" />
+    
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Kanji Trainer - Learn Japanese Characters" />
+    <meta property="og:description" content="Interactive Japanese kanji learning with flashcards and writing practice for JLPT levels N1-N5." />
+    <meta property="og:image" content="/vite.svg" />
+    
+    <!-- Initial loading styles -->
+    <style>
+      /* Root container with safe areas */
+      #root {
+        min-height: 100vh;
+        min-height: 100dvh; /* Dynamic viewport height */
+        display: flex;
+        flex-direction: column;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      
+      /* Initial loading screen */
+      .loading-initial {
+        display: flex;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        min-height: 100vh;
+        min-height: 100dvh;
+        background: #f9fafb;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      
+      /* Dark mode support for loading */
+      @media (prefers-color-scheme: dark) {
+        .loading-initial {
+          background: #111827;
+          color: #f9fafb;
+        }
+        .loading-initial .spinner {
+          border-color: #374151;
+          border-top-color: #60a5fa;
+        }
+      }
+      
+      /* Loading spinner with fallbacks */
+      .loading-initial .spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e5e7eb;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        -webkit-animation: spin 1s linear infinite;
+        animation: spin 1s linear infinite;
+      }
+      
+      /* Spinner animation with vendor prefixes */
+      @-webkit-keyframes spin {
+        to { -webkit-transform: rotate(360deg); }
+      }
+      
+      @keyframes spin {
+        to { 
+          -webkit-transform: rotate(360deg);
+          transform: rotate(360deg); 
+        }
+      }
+      
+      /* Reduced motion support */
+      @media (prefers-reduced-motion: reduce) {
+        .loading-initial .spinner {
+          -webkit-animation: none;
+          animation: none;
+          border-top-color: transparent;
+          border-right-color: #3b82f6;
+        }
+      }
+      
+      /* High contrast mode */
+      @media (prefers-contrast: high) {
+        .loading-initial .spinner {
+          border-width: 4px;
+          border-color: currentColor;
+          border-top-color: transparent;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- Initial loading indicator -->
+      <div class="loading-initial">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

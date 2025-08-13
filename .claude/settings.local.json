@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(rm:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run dev:*)",
+      "Bash(claude doctor)",
+      "Bash(wc:*)",
+      "Bash(node:*)",
+      "Bash(docker build:*)",
+      "Bash(docker system prune:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker run:*)",
+      "Bash(curl:*)",
+      "Bash(docker stop:*)",
+      "Bash(docker rm:*)",
+      "Bash(grep:*)",
+      "Bash(for level in n5 n4 n3 n2 n1)",
+      "Bash(do echo:*)",
+      "Bash(done)",
+      "WebSearch",
+      "WebFetch(domain:www.kanshudo.com)",
+      "WebFetch(domain:jlptsensei.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:localhost)",
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "mcp__puppeteer__puppeteer_click",
+      "mcp__puppeteer__puppeteer_evaluate"
+    ],
+    "deny": []
+  }
+}
