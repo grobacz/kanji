@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { useRef, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Stage, Layer, Line } from 'react-konva';
 // import { KonvaEventObject } from 'konva/lib/Node'; // Not used currently
 
@@ -177,12 +177,15 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
             <Line
               key={index}
               points={stroke.points}
-              stroke="#1f2937"
-              strokeWidth={3}
+              stroke="#000000"
+              strokeWidth={6}
               tension={0.1}
               lineCap="round"
               lineJoin="round"
               globalCompositeOperation="source-over"
+              shadowColor="#00000020"
+              shadowBlur={2}
+              shadowOffset={{ x: 1, y: 1 }}
             />
           ))}
           
@@ -190,12 +193,15 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
           {currentStroke && (
             <Line
               points={currentStroke.points}
-              stroke="#3b82f6"
-              strokeWidth={3}
+              stroke="#dc2626"
+              strokeWidth={6}
               tension={0.1}
               lineCap="round"
               lineJoin="round"
               globalCompositeOperation="source-over"
+              shadowColor="#dc262620"
+              shadowBlur={2}
+              shadowOffset={{ x: 1, y: 1 }}
             />
           )}
         </Layer>

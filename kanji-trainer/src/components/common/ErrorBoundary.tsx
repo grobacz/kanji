@@ -41,17 +41,17 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 p-4">
           <div className="max-w-lg w-full mx-auto">
-            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-              <div className="text-red-500 text-6xl mb-6" role="img" aria-label="Error">
+            <div className="bg-white rounded-xl shadow-lg border border-red-100 p-8 text-center">
+              <div className="text-red-500 text-6xl mb-6" role="img" aria-label="Error occurred">
                 ⚠️
               </div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              <h1 className="text-2xl font-bold text-gray-900 mb-4" role="alert">
                 Oops! Something went wrong
               </h1>
               <p className="text-gray-600 mb-6">
-                Don't worry, this happens sometimes. You can try refreshing the page or going back to the home screen.
+                Don't worry, this happens sometimes. You can try the options below to get back to learning kanji.
               </p>
               
               <div className="space-y-3">

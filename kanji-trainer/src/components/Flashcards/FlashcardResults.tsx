@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FlashcardSession } from '../../types';
+import type { FlashcardSession } from '../../types';
 
 interface FlashcardResultsProps {
   session: FlashcardSession;

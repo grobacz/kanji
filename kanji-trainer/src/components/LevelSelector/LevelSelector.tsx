@@ -87,14 +87,18 @@ const LevelSelector: React.FC = () => {
           >
             <button
               onClick={() => handleLevelSelect(levelInfo.level)}
-              className={`w-full glass-card hover:shadow-glow transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 float-card group ${
+              className={`w-full glass-card hover:shadow-glow transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 float-card group touch-manipulation no-tap-highlight ${
                 selectedLevel === levelInfo.level
-                  ? 'ring-2 ring-primary-400 shadow-glow-lg'
+                  ? 'ring-4 ring-primary-400 shadow-glow-lg bg-gradient-to-br from-blue-50/80 to-purple-50/80'
                   : ''
               }`}
-              style={{ animationDelay: `${index * 0.5}s` }}
+              style={{ 
+                animationDelay: `${index * 0.5}s`,
+                minHeight: '280px',
+                touchAction: 'manipulation'
+              }}
             >
-              <div className="p-8 text-center relative">
+              <div className="p-6 sm:p-8 text-center relative flex flex-col justify-center h-full">
                 {selectedLevel === levelInfo.level && (
                   <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-500 to-success-600 rounded-full flex items-center justify-center animate-bounce-in">
                     <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -103,8 +107,8 @@ const LevelSelector: React.FC = () => {
                   </div>
                 )}
                 
-                <div className="relative mb-4">
-                  <div className={`text-5xl font-black mb-3 transition-all duration-300 ${
+                <div className="relative mb-6">
+                  <div className={`text-6xl sm:text-7xl font-black mb-4 transition-all duration-300 ${
                     selectedLevel === levelInfo.level 
                       ? 'gradient-text scale-110' 
                       : 'text-slate-700 dark:text-slate-300 group-hover:gradient-text group-hover:scale-105'
@@ -114,12 +118,12 @@ const LevelSelector: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-primary-400/0 via-primary-400/20 to-primary-400/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
                 </div>
                 
-                <div className="text-lg font-semibold text-slate-600 dark:text-slate-400 mb-3 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
+                <div className="text-xl font-bold text-slate-600 dark:text-slate-400 mb-4 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
                   {levelInfo.description}
                 </div>
                 
-                <div className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-full text-sm font-medium text-slate-700 dark:text-slate-300">
-                  <span className="mr-1">📚</span>
+                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-full text-base font-semibold text-slate-700 dark:text-slate-300">
+                  <span className="mr-2 text-lg">📚</span>
                   ~{levelInfo.count} kanji
                 </div>
               </div>
@@ -150,17 +154,21 @@ const LevelSelector: React.FC = () => {
                 </p>
               </div>
               
-              <div className="flex flex-row gap-4 mt-6 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 mt-6 justify-center w-full">
                 <a
                   href="/write"
-                  className="button-base px-6 py-3 text-lg font-semibold"
+                  className="button-base px-8 py-4 text-lg font-bold flex-1 sm:flex-none touch-manipulation"
+                  style={{ minHeight: '56px' }}
                 >
                   ✍️ Start Writing Practice
                 </a>
                 <a
                   href="/flashcards"
-                  className="button-base px-6 py-3 text-lg font-semibold"
-                  style={{ background: 'var(--gradient-secondary)' }}
+                  className="button-base px-8 py-4 text-lg font-bold flex-1 sm:flex-none touch-manipulation"
+                  style={{ 
+                    background: 'var(--gradient-secondary)',
+                    minHeight: '56px'
+                  }}
                 >
                   🃏 Try Flashcards
                 </a>

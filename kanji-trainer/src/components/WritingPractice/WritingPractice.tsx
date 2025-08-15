@@ -14,13 +14,28 @@ interface DrawingCanvasRef {
   clear: () => void;
 }
 
+interface StrokeData {
+  points: number[][];
+  startTime: number;
+  endTime: number;
+}
+
+interface ValidationResult {
+  score: number;
+  isValid: boolean;
+  feedback: string[];
+  strokeCount: { actual: number; expected: number; correct: boolean };
+  coverage: { percentage: number; adequate: boolean };
+  timing: { totalTime: number; averageStrokeTime: number; reasonable: boolean };
+}
+
 const WritingPractice: React.FC = () => {
   const selectedLevel = useAppStore((state) => state.selectedLevel);
   const { data: kanjiData, isLoading, error } = useKanjiByLevel(selectedLevel);
   
   const [currentKanjiIndex, setCurrentKanjiIndex] = useState(0);
-  const [strokes, setStrokes] = useState<any[]>([]);
-  const [validationResult, setValidationResult] = useState<any | null>(null);
+  const [strokes, setStrokes] = useState<StrokeData[]>([]);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [showReference, setShowReference] = useState(false);
   const [sessionStats, setSessionStats] = useState({ attempts: 0, goodAttempts: 0 });

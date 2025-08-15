@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import FlashcardResults from './FlashcardResults';
-import { FlashcardSession } from '../../types';
+import type { FlashcardSession } from '../../types';
 
 const createMockSession = (correct: number, incorrect: number): FlashcardSession => ({
   kanji: [

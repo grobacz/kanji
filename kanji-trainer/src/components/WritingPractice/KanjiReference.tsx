@@ -69,10 +69,10 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
         delayBetweenStrokes: 300 / animationSpeed,
         showOutline: true,
         showCharacter: false,
-        strokeColor: '#3b82f6',
-        radicalColor: '#ef4444',
-        outlineColor: '#e5e7eb',
-        drawingColor: '#10b981',
+        strokeColor: '#000000',
+        radicalColor: '#dc2626',
+        outlineColor: '#9ca3af',
+        drawingColor: '#059669',
       });
     } catch (error) {
       console.error('Error creating HanziWriter:', error);

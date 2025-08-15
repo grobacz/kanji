@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { useKanjiByLevel } from '../../hooks/useKanjiData';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import FlashcardDeck from './FlashcardDeck';
 import LoadingSpinner from '../common/LoadingSpinner';
+import SkeletonLoader from '../common/SkeletonLoader';
 
 const Flashcards: React.FC = () => {
   const selectedLevel = useAppStore((state) => state.selectedLevel);
@@ -18,6 +19,7 @@ const Flashcards: React.FC = () => {
   const markIncorrect = useAppStore((state) => state.markIncorrect);
 
   const { data: kanjiData, isLoading, error } = useKanjiByLevel(selectedLevel);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -25,9 +27,15 @@ const Flashcards: React.FC = () => {
     };
   }, [resetFlashcardSession]);
 
-  const handleStartSession = () => {
+  const handleStartSession = async () => {
     if (kanjiData && kanjiData.length > 0) {
+      setIsInitializing(true);
+      
+      // Add a small delay for better UX (shows loading state)
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       initializeFlashcardSession(kanjiData);
+      setIsInitializing(false);
     }
   };
 
@@ -64,9 +72,41 @@ const Flashcards: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-2xl mx-auto text-center">
-        <LoadingSpinner />
-        <p className="text-gray-600 mt-4">Loading kanji data...</p>
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="space-y-8"
+        >
+          {/* Header skeleton */}
+          <div className="text-center">
+            <SkeletonLoader variant="text" height="36px" width="300px" className="mx-auto mb-4" />
+            <SkeletonLoader variant="text" height="20px" width="400px" className="mx-auto" />
+          </div>
+          
+          {/* Content skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <SkeletonLoader variant="card" height="400px" />
+              <div className="space-y-3">
+                <SkeletonLoader variant="text" height="16px" count={3} />
+              </div>
+            </div>
+            <div className="space-y-6">
+              <SkeletonLoader variant="card" height="400px" />
+              <div className="space-y-2">
+                <SkeletonLoader variant="text" height="14px" count={4} />
+              </div>
+            </div>
+          </div>
+          
+          {/* Loading message */}
+          <div className="text-center">
+            <LoadingSpinner size="sm" className="mb-3" />
+            <p className="text-gray-600 animate-pulse">Loading kanji data...</p>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -147,12 +187,24 @@ const Flashcards: React.FC = () => {
             </p>
             
             <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: isInitializing ? 1 : 1.05 }}
+              whileTap={{ scale: isInitializing ? 1 : 0.95 }}
               onClick={handleStartSession}
-              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-lg"
+              disabled={isInitializing}
+              className={`w-full px-6 py-3 rounded-lg transition-all duration-200 font-medium text-lg flex items-center justify-center gap-3 ${
+                isInitializing 
+                  ? 'bg-blue-400 cursor-not-allowed' 
+                  : 'bg-blue-600 hover:bg-blue-700'
+              } text-white`}
             >
-              Start Flashcard Session
+              {isInitializing ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  <span>Preparing Session...</span>
+                </>
+              ) : (
+                'Start Flashcard Session'
+              )}
             </motion.button>
           </div>
         </motion.div>

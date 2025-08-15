@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { StrokeValidator, validateKanjiDrawing, StrokeData } from './strokeValidation';
-import { Kanji } from '../types';
+import type { Kanji } from '../types';
 
 const mockKanji: Kanji = {
   id: 'test-1',

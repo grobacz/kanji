@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import FlashcardItem from './FlashcardItem';
-import { Kanji } from '../../types';
+import type { Kanji } from '../../types';
 
 const mockKanji: Kanji = {
   id: 'test-1',

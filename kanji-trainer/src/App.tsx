@@ -5,7 +5,6 @@ import { Suspense, lazy, useEffect } from 'react';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Header from './components/common/Header';
 import Navigation from './components/common/Navigation';
-import ProgressiveLoader from './components/common/ProgressiveLoader';
 
 // Lazy load route components with preloading hints
 const LevelSelector = lazy(() => 
@@ -15,7 +14,7 @@ const WritingPractice = lazy(() =>
   import(/* webpackChunkName: "writing-practice" */ './components/WritingPractice/WritingPractice')
 );
 const Flashcards = lazy(() => 
-  import(/* webpackChunkName: "flashcards" */ './components/Flashcards/FlashcardsSimple')
+  import(/* webpackChunkName: "flashcards" */ './components/Flashcards/Flashcards')
 );
 
 // Preload components on idle for better UX
@@ -23,13 +22,13 @@ const preloadComponents = () => {
   if ('requestIdleCallback' in window) {
     requestIdleCallback(() => {
       import('./components/WritingPractice/WritingPractice');
-      import('./components/Flashcards/FlashcardsSimple');
+      import('./components/Flashcards/Flashcards');
     });
   } else {
     // Fallback for browsers without requestIdleCallback
     setTimeout(() => {
       import('./components/WritingPractice/WritingPractice');
-      import('./components/Flashcards/FlashcardsSimple');
+      import('./components/Flashcards/Flashcards');
     }, 2000);
   }
 };
@@ -42,6 +41,7 @@ const queryClient = new QueryClient({
     },
   },
 });
+
 
 function App() {
   // Preload components after initial render
@@ -68,35 +68,40 @@ function App() {
               role="main"
               aria-live="polite"
             >
-              <Suspense fallback={
-                <ProgressiveLoader
-                  isLoading={true}
-                  title="Loading Page"
-                  description="Preparing your learning experience..."
-                  showProgress={false}
-                >
-                  <div />
-                </ProgressiveLoader>
-              }>
-                <Routes>
-                  <Route path="/" element={<LevelSelector />} />
-                  <Route path="/level" element={<LevelSelector />} />
-                  <Route path="/write" element={<WritingPractice />} />
-                  <Route path="/flashcards" element={<Flashcards />} />
-                  <Route path="*" element={
-                    <div className="text-center py-12">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
-                      <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
-                      <a 
-                        href="/" 
-                        className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus-ring"
-                      >
-                        Go Home
-                      </a>
-                    </div>
-                  } />
-                </Routes>
-              </Suspense>
+              <Routes>
+                <Route path="/" element={
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <LevelSelector />
+                  </Suspense>
+                } />
+                <Route path="/level" element={
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <LevelSelector />
+                  </Suspense>
+                } />
+                <Route path="/write" element={
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <WritingPractice />
+                  </Suspense>
+                } />
+                <Route path="/flashcards" element={
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <Flashcards />
+                  </Suspense>
+                } />
+                <Route path="*" element={
+                  <div className="text-center py-12">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Page Not Found</h2>
+                    <p className="text-gray-600 mb-6">The page you're looking for doesn't exist.</p>
+                    <a 
+                      href="/" 
+                      className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus-ring"
+                    >
+                      Go Home
+                    </a>
+                  </div>
+                } />
+              </Routes>
             </main>
             <Navigation />
           </div>
