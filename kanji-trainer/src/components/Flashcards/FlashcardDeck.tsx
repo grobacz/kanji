@@ -82,17 +82,17 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4">
-      {/* Enhanced Header with progress */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
+    <div className="max-w-4xl mx-auto px-4 min-h-screen flex flex-col py-6">
+      {/* Compact Header with progress */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-3">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-gray-900">
               Flashcards - Level {currentKanji?.level}
             </h2>
             {accuracy > 0 && (
               <div className="text-sm text-gray-600 mt-1">
-                Current accuracy: <span className={`font-semibold ${
+                Accuracy: <span className={`font-semibold ${
                   accuracy >= 80 ? 'text-green-600' : 
                   accuracy >= 60 ? 'text-yellow-600' : 'text-red-600'
                 }`}>{accuracy}%</span>
@@ -101,7 +101,7 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
           </div>
           <div className="text-right">
             <div className="text-lg font-semibold text-gray-800">
-              {session.currentIndex + 1} of {session.totalCount}
+              {session.currentIndex + 1} / {session.totalCount}
             </div>
             <div className="text-sm text-gray-500">
               {Math.round(progress)}% complete
@@ -109,11 +109,11 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
           </div>
         </div>
         
-        {/* Enhanced Progress bar with milestone celebrations */}
+        {/* Compact Progress bar */}
         <div className="relative">
-          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
             <motion.div
-              className={`h-3 rounded-full transition-colors duration-500 ${
+              className={`h-2 rounded-full transition-colors duration-500 ${
                 progress >= 100 ? 'bg-gradient-to-r from-green-500 to-green-600' :
                 progress >= 80 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
                 'bg-gradient-to-r from-blue-500 to-blue-600'
@@ -123,38 +123,23 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
               transition={{ duration: 0.5, ease: "easeOut" }}
             />
           </div>
-          
-          {/* Milestone markers */}
-          <div className="absolute top-0 left-1/2 w-1 h-3 bg-white border border-gray-300 rounded-full transform -translate-x-1/2" />
-          <div className="absolute top-0 left-4/5 w-1 h-3 bg-white border border-gray-300 rounded-full transform -translate-x-1/2" />
-          
-          {/* Celebration animations for milestones */}
-          {isHalfway && progress >= 50 && progress < 52 && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-2xl"
-            >
-              🎉
-            </motion.div>
-          )}
-          
-          {isNearEnd && progress >= 80 && progress < 82 && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              className="absolute -top-8 left-4/5 transform -translate-x-1/2 text-2xl"
-            >
-              🏁
-            </motion.div>
-          )}
+        </div>
+        
+        {/* Compact score display inline */}
+        <div className="flex justify-center gap-6 mt-3 text-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-green-600 font-bold text-lg">{session.correctCount}</span>
+            <span className="text-gray-600">correct</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-red-600 font-bold text-lg">{session.incorrectCount}</span>
+            <span className="text-gray-600">review</span>
+          </div>
         </div>
       </div>
 
-      {/* Flashcard container - improved spacing with swipe gestures */}
-      <div className="mb-8" {...swipeGestures}>
+      {/* Flashcard container - maximized space */}
+      <div className="flex-1 flex flex-col justify-center relative z-10 mb-6" {...swipeGestures}>
         <AnimatePresence mode="wait">
           <motion.div
             key={session.currentIndex}
@@ -170,14 +155,6 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
             />
           </motion.div>
         </AnimatePresence>
-        
-        {/* Swipe hint for mobile */}
-        <div className="mt-4 text-center text-xs text-gray-500 md:hidden">
-          <span className="inline-flex items-center gap-2">
-            <span>👈 Swipe left/right to navigate</span>
-            <span>👆 Swipe up to flip</span>
-          </span>
-        </div>
       </div>
 
       {/* Answer feedback buttons */}
@@ -188,137 +165,134 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: -30, opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
-            className="mb-8 bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 shadow-lg"
+            className="mb-6 bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-200/60 shadow-lg relative z-20 flex-shrink-0"
           >
-            <div className="text-center mb-8">
-              <p className="text-2xl font-bold text-gray-800 mb-3">
+            <div className="text-center mb-4">
+              <p className="text-lg font-bold text-gray-800 mb-2">
                 Did you know this kanji?
               </p>
-              <p className="text-base text-gray-600">
-                Be honest with yourself – it helps with learning!
+              <p className="text-sm text-gray-600">
+                Be honest – it helps with learning!
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+            <div className="flex flex-col sm:flex-row justify-center gap-3 max-w-md mx-auto">
               <motion.button
-                whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(34, 197, 94, 0.3)" }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02, boxShadow: "0 6px 20px rgba(34, 197, 94, 0.25)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleCorrect}
-                className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-200 font-bold shadow-lg flex-1 sm:flex-none sm:min-w-[160px] justify-center"
-                style={{ minHeight: '56px' }}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:flex-none justify-center"
               >
-                <CheckIcon className="w-6 h-6" />
-                <span className="text-lg">I knew it!</span>
+                <CheckIcon className="w-5 h-5" />
+                <span>I knew it!</span>
               </motion.button>
               <motion.button
-                whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(239, 68, 68, 0.3)" }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02, boxShadow: "0 6px 20px rgba(239, 68, 68, 0.25)" }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleIncorrect}
-                className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 font-bold shadow-lg flex-1 sm:flex-none sm:min-w-[160px] justify-center"
-                style={{ minHeight: '56px' }}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:flex-none justify-center"
               >
-                <XMarkIcon className="w-6 h-6" />
-                <span className="text-lg">Need practice</span>
+                <XMarkIcon className="w-5 h-5" />
+                <span>Need practice</span>
               </motion.button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Navigation controls - properly aligned and sized */}
-      <div className="flex items-center justify-center gap-4 w-full">
-        {/* Previous button */}
-        <button
-          onClick={onPrevious}
-          disabled={session.currentIndex === 0}
-          className={`flex items-center gap-2 px-6 py-4 rounded-xl font-bold transition-all duration-200 shadow-lg ${
-            session.currentIndex === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 hover:shadow-xl'
-          }`}
-          style={{ minHeight: '56px', minWidth: '120px' }}
-        >
-          <ChevronLeftIcon className="w-5 h-5" />
-          <span>Previous</span>
-        </button>
-
+      {/* Navigation controls - horizontal layout */}
+      <div className="w-full relative z-20 flex-shrink-0">
         {/* Center action button */}
         {!session.showAnswer && (
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onToggleAnswer}
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-bold shadow-lg hover:shadow-xl"
-            style={{ minHeight: '56px', minWidth: '180px' }}
-          >
-            <span className="flex items-center gap-3">
-              <span className="text-lg">🔍</span>
-              <span>Show Answer</span>
-            </span>
-          </motion.button>
+          <div className="flex justify-center mb-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onToggleAnswer}
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold shadow-md hover:shadow-lg"
+            >
+              <span className="flex items-center gap-2">
+                <span>👆</span>
+                <span>Tap to reveal meaning</span>
+              </span>
+            </motion.button>
+          </div>
         )}
+        
+        {/* Previous/Next buttons side by side */}
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '16px', 
+          width: '100%', 
+          margin: '0 auto' 
+        }}>
+          <button
+            onClick={onPrevious}
+            disabled={session.currentIndex === 0}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '150px',
+              height: '50px',
+              padding: '0',
+              margin: '0',
+              backgroundColor: session.currentIndex === 0 ? '#f3f4f6' : '#ffffff',
+              color: session.currentIndex === 0 ? '#9ca3af' : '#374151',
+              border: session.currentIndex === 0 ? '1px solid #d1d5db' : '1px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: session.currentIndex === 0 ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              flexShrink: 0,
+              flexGrow: 0,
+              boxSizing: 'border-box'
+            }}
+          >
+            <ChevronLeftIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+            <span style={{ flexShrink: 0 }}>Previous</span>
+          </button>
 
-        {/* Next button */}
-        <button
-          onClick={onNext}
-          disabled={session.currentIndex >= session.totalCount - 1}
-          className={`flex items-center gap-2 px-6 py-4 rounded-xl font-bold transition-all duration-200 shadow-lg ${
-            session.currentIndex >= session.totalCount - 1
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 hover:shadow-xl'
-          }`}
-          style={{ minHeight: '56px', minWidth: '120px' }}
-        >
-          <span>Next</span>
-          <ChevronRightIcon className="w-5 h-5" />
-        </button>
+          <button
+            onClick={onNext}
+            disabled={session.currentIndex >= session.totalCount - 1}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '150px',
+              height: '50px',
+              padding: '0',
+              margin: '0',
+              backgroundColor: session.currentIndex >= session.totalCount - 1 ? '#f3f4f6' : '#ffffff',
+              color: session.currentIndex >= session.totalCount - 1 ? '#9ca3af' : '#374151',
+              border: session.currentIndex >= session.totalCount - 1 ? '1px solid #d1d5db' : '1px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: session.currentIndex >= session.totalCount - 1 ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+              flexShrink: 0,
+              flexGrow: 0,
+              boxSizing: 'border-box'
+            }}
+          >
+            <span style={{ flexShrink: 0 }}>Next</span>
+            <ChevronRightIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+          </button>
+        </div>
       </div>
 
-      {/* Enhanced Score display */}
-      <motion.div 
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
-      >
-        <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Session Progress</h3>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600 mb-1">
-                {session.correctCount}
-              </div>
-              <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                <span className="text-green-500">✓</span>
-                Correct
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600 mb-1">
-                {session.incorrectCount}
-              </div>
-              <div className="text-sm text-gray-600 flex items-center justify-center gap-1">
-                <span className="text-red-500">✗</span>
-                Need Review
-              </div>
-            </div>
-          </div>
-          
-          {accuracy > 0 && (
-            <div className="mt-4 pt-4 border-t border-blue-200">
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-sm text-gray-600">Accuracy:</span>
-                <span className={`text-lg font-bold ${
-                  accuracy >= 80 ? 'text-green-600' : 
-                  accuracy >= 60 ? 'text-yellow-600' : 'text-red-600'
-                }`}>
-                  {accuracy}%
-                </span>
-                {accuracy >= 80 && <span className="text-lg">🌟</span>}
-                {accuracy >= 90 && <span className="text-lg">🎯</span>}
-              </div>
-            </div>
-          )}
-        </div>
-      </motion.div>
+      {/* Mobile swipe hint */}
+      <div className="mt-3 text-center text-xs text-gray-500 md:hidden">
+        <span>👈 Swipe left/right to navigate • 👆 Swipe up to flip</span>
+      </div>
     </div>
   );
 };

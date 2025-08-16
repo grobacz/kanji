@@ -19,7 +19,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
   };
 
   return (
-    <div className="relative w-full perspective-1000" style={{ height: 'clamp(300px, 50vh, 400px)' }}>
+    <div className="relative w-full perspective-1000" style={{ height: 'clamp(350px, 60vh, 500px)' }}>
       <motion.div
         className="relative w-full h-full preserve-3d cursor-pointer"
         onClick={handleCardClick}
@@ -59,7 +59,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             transform: "rotateY(180deg)"
           }}
         >
-          <div className="flex flex-col h-full p-4 sm:p-6">
+          <div className="flex flex-col h-full p-4 sm:p-6 overflow-hidden">
             {/* Header with kanji */}
             <div className="text-center mb-4">
               <div className="text-3xl sm:text-4xl font-bold text-gray-900 kanji-text">
@@ -68,15 +68,15 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             </div>
             
             {/* Primary focus - Meanings */}
-            <div className="flex-1 flex flex-col justify-center mb-4">
-              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 text-center">
+            <div className="flex-1 flex flex-col justify-center mb-3 min-h-0">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 text-center flex-shrink-0">
                 Meanings
               </h3>
-              <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 overflow-y-auto">
                 {kanji.meanings.map((meaning, index) => (
                   <span
                     key={index}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg text-base sm:text-lg font-semibold shadow-sm"
+                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold shadow-sm flex-shrink-0"
                   >
                     {meaning}
                   </span>
@@ -85,15 +85,15 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             </div>
 
             {/* Secondary - Readings (expandable design) */}
-            <details className="mb-4 group">
-              <summary className="cursor-pointer text-center text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors list-none">
-                <span className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg transition-colors">
+            <details className="mb-2 group flex-shrink-0">
+              <summary className="cursor-pointer text-center text-xs font-medium text-gray-600 hover:text-gray-800 transition-colors list-none">
+                <span className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-lg transition-colors">
                   <span>📖</span>
                   Show readings
                   <span className="group-open:rotate-180 transition-transform">▼</span>
                 </span>
               </summary>
-              <div className="mt-3 space-y-3 animate-fade-in">
+              <div className="mt-2 space-y-2 animate-fade-in max-h-24 overflow-y-auto">
                 {kanji.readings.onyomi.length > 0 && (
                   <div>
                     <h4 className="text-xs font-medium text-gray-600 mb-2 flex items-center justify-center gap-2">
@@ -135,7 +135,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             </details>
 
             {/* Footer - metadata */}
-            <div className="text-center text-xs text-gray-500 bg-white/50 px-3 py-2 rounded-lg">
+            <div className="mt-auto text-center text-xs text-gray-500 bg-white/50 px-3 py-2 rounded-lg flex-shrink-0">
               <span className="inline-flex items-center gap-3">
                 <span>✏️ {kanji.strokes} strokes</span>
                 <span>📚 Level {kanji.level}</span>
