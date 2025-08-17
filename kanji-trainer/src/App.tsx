@@ -64,7 +64,7 @@ function App() {
             <Header />
             <main 
               id="main-content" 
-              className="flex-1 container mx-auto px-4 py-8 relative z-10"
+              className="flex-1 container mx-auto px-4 py-8 relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]"
               role="main"
               aria-live="polite"
             >

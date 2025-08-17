@@ -129,7 +129,7 @@ const WritingPractice: React.FC = () => {
 
   if (!selectedLevel) {
     return (
-      <div className="max-w-2xl mx-auto text-center">
+      <div className="w-full max-w-2xl mx-auto text-center">
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold text-yellow-800 mb-4">
             Please Select a Level First
@@ -150,7 +150,7 @@ const WritingPractice: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="w-full max-w-4xl mx-auto text-center">
         <LoadingSpinner />
         <p className="text-gray-600 mt-4">Loading kanji data...</p>
       </div>
@@ -159,7 +159,7 @@ const WritingPractice: React.FC = () => {
 
   if (error || !kanjiData || kanjiData.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto text-center">
+      <div className="w-full max-w-4xl mx-auto text-center">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6">
           <h2 className="text-xl font-semibold text-red-800 mb-4">
             Error Loading Kanji Data
@@ -179,7 +179,7 @@ const WritingPractice: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="w-full max-w-6xl mx-auto">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

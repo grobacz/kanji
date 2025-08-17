@@ -21,7 +21,7 @@ const LevelSelector: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Loading Kanji Data...
@@ -37,7 +37,7 @@ const LevelSelector: React.FC = () => {
 
   if (isError) {
     return (
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <div className="bg-red-50 border border-red-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-red-800 mb-4">
@@ -68,7 +68,7 @@ const LevelSelector: React.FC = () => {
   });
 
   return (
-    <div className="max-w-6xl mx-auto animate-fade-in">
+    <div className="w-full max-w-6xl mx-auto animate-fade-in">
       <div className="text-center mb-12">
         <h2 className="text-4xl sm:text-5xl font-bold gradient-text mb-6">
           Choose Your JLPT Level

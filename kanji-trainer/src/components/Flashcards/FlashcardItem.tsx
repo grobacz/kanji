@@ -59,24 +59,26 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             transform: "rotateY(180deg)"
           }}
         >
-          <div className="flex flex-col h-full p-4 sm:p-6 overflow-hidden">
+          <div className="flex flex-col h-full p-6 overflow-hidden">
             {/* Header with kanji */}
-            <div className="text-center mb-4">
-              <div className="text-3xl sm:text-4xl font-bold text-gray-900 kanji-text">
+            <div className="text-center mb-6">
+              <div className="text-4xl sm:text-5xl font-bold text-gray-900 kanji-text mb-2">
                 {kanji.character}
               </div>
+              <div className="h-px bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
             </div>
             
             {/* Primary focus - Meanings */}
-            <div className="flex-1 flex flex-col justify-center mb-3 min-h-0">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 text-center flex-shrink-0">
+            <div className="flex-1 flex flex-col justify-center mb-6 min-h-0">
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 text-center flex-shrink-0 flex items-center justify-center gap-2">
+                <span className="text-blue-600">💭</span>
                 Meanings
               </h3>
-              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 overflow-y-auto">
+              <div className="flex flex-wrap justify-center gap-3 overflow-y-auto max-h-32">
                 {kanji.meanings.map((meaning, index) => (
                   <span
                     key={index}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold shadow-sm flex-shrink-0"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full text-base font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex-shrink-0"
                   >
                     {meaning}
                   </span>
@@ -84,27 +86,27 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
               </div>
             </div>
 
-            {/* Secondary - Readings (expandable design) */}
-            <details className="mb-2 group flex-shrink-0">
-              <summary className="cursor-pointer text-center text-xs font-medium text-gray-600 hover:text-gray-800 transition-colors list-none">
-                <span className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded-lg transition-colors">
+            {/* Secondary - Readings */}
+            <details className="mb-4 group flex-shrink-0" open>
+              <summary className="cursor-pointer text-center text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors list-none mb-3">
+                <span className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm hover:bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 transition-all duration-200">
                   <span>📖</span>
-                  Show readings
-                  <span className="group-open:rotate-180 transition-transform">▼</span>
+                  Readings
+                  <span className="group-open:rotate-180 transition-transform duration-200">▼</span>
                 </span>
               </summary>
-              <div className="mt-2 space-y-2 animate-fade-in max-h-24 overflow-y-auto">
+              <div className="space-y-3 animate-fade-in max-h-28 overflow-y-auto">
                 {kanji.readings.onyomi.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-600 mb-2 flex items-center justify-center gap-2">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-red-200">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center justify-center gap-2">
                       <span className="text-red-600">🇨🇳</span>
-                      On'yomi (Chinese reading)
+                      On'yomi
                     </h4>
-                    <div className="flex flex-wrap justify-center gap-1">
+                    <div className="flex flex-wrap justify-center gap-2">
                       {kanji.readings.onyomi.map((reading, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 bg-red-100 text-red-800 rounded text-sm border border-red-200"
+                          className="px-3 py-1 bg-red-100 text-red-800 rounded-lg text-sm font-medium border border-red-200 shadow-sm"
                         >
                           {reading}
                         </span>
@@ -114,16 +116,16 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
                 )}
                 
                 {kanji.readings.kunyomi.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-medium text-gray-600 mb-2 flex items-center justify-center gap-2">
+                  <div className="bg-white/60 backdrop-blur-sm rounded-lg p-3 border border-green-200">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2 flex items-center justify-center gap-2">
                       <span className="text-green-600">🇯🇵</span>
-                      Kun'yomi (Japanese reading)
+                      Kun'yomi
                     </h4>
-                    <div className="flex flex-wrap justify-center gap-1">
+                    <div className="flex flex-wrap justify-center gap-2">
                       {kanji.readings.kunyomi.map((reading, index) => (
                         <span
                           key={index}
-                          className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm border border-green-200"
+                          className="px-3 py-1 bg-green-100 text-green-800 rounded-lg text-sm font-medium border border-green-200 shadow-sm"
                         >
                           {reading}
                         </span>
@@ -135,12 +137,23 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             </details>
 
             {/* Footer - metadata */}
-            <div className="mt-auto text-center text-xs text-gray-500 bg-white/50 px-3 py-2 rounded-lg flex-shrink-0">
-              <span className="inline-flex items-center gap-3">
-                <span>✏️ {kanji.strokes} strokes</span>
-                <span>📚 Level {kanji.level}</span>
-                {kanji.frequency && <span>📊 #{kanji.frequency}</span>}
-              </span>
+            <div className="mt-auto text-center text-sm text-gray-600 bg-white/70 backdrop-blur-sm px-4 py-3 rounded-xl flex-shrink-0 border border-gray-200 shadow-sm">
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <span className="inline-flex items-center gap-1 font-medium">
+                  <span className="text-orange-500">✏️</span>
+                  {kanji.strokes} strokes
+                </span>
+                <span className="inline-flex items-center gap-1 font-medium">
+                  <span className="text-blue-500">📚</span>
+                  Level {kanji.level}
+                </span>
+                {kanji.frequency && (
+                  <span className="inline-flex items-center gap-1 font-medium">
+                    <span className="text-purple-500">📊</span>
+                    #{kanji.frequency}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

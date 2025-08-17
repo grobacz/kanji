@@ -82,7 +82,7 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 min-h-screen flex flex-col py-6">
+    <div className="w-full max-w-4xl mx-auto px-4 min-h-screen flex flex-col py-6">
       {/* Compact Header with progress */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-3">
