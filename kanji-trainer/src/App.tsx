@@ -57,8 +57,8 @@ function App() {
             {/* Beautiful animated background elements */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
               <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-2xl animate-float"></div>
-              <div className="absolute top-20 -left-20 w-48 h-48 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full blur-2xl animate-float" style={{animationDelay: '2s'}}></div>
-              <div className="absolute bottom-20 right-10 w-32 h-32 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-float" style={{animationDelay: '4s'}}></div>
+              <div className="absolute top-20 -left-20 w-48 h-48 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-full blur-2xl animate-float animate-delay-2000"></div>
+              <div className="absolute bottom-20 right-10 w-32 h-32 bg-gradient-to-r from-purple-400/10 to-pink-400/10 rounded-full blur-2xl animate-float animate-delay-4000"></div>
             </div>
             
             <Header />

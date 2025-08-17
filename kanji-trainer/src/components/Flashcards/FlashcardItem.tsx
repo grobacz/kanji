@@ -19,7 +19,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
   };
 
   return (
-    <div className="relative w-full perspective-1000" style={{ height: 'clamp(350px, 60vh, 500px)' }}>
+    <div className="relative w-full perspective-1000 card-height-clamp">
       <motion.div
         className="relative w-full h-full preserve-3d cursor-pointer"
         onClick={handleCardClick}
@@ -35,8 +35,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
           <div className="text-center relative flex flex-col items-center justify-center h-full px-4">
             {/* Large, prominent kanji */}
             <div 
-              className="font-black mb-6 text-gray-800 kanji-text leading-none transition-transform duration-300 group-hover:scale-105"
-              style={{ fontSize: 'clamp(8rem, 20vw, 12rem)' }}
+              className="font-black mb-6 text-gray-800 kanji-text kanji-xl leading-none transition-transform duration-300 group-hover:scale-105"
             >
               {kanji.character}
             </div>

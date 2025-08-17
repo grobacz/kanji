@@ -44,16 +44,12 @@ const Navigation: React.FC = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex flex-col items-center py-5 px-8 transition-all duration-300 focus-ring no-tap-highlight touch-manipulation rounded-xl m-1 group relative overflow-hidden ${
+                className={`flex flex-col items-center py-5 px-8 transition-all duration-300 focus-ring no-tap-highlight touch-manipulation rounded-xl m-1 group relative overflow-hidden btn-nav ${
                   isActive
                     ? 'text-white shadow-glow scale-105'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:scale-105 hover:shadow-md hover:bg-white/50 dark:hover:bg-slate-800/50'
                 }`}
-                style={{
-                  minHeight: '64px',
-                  minWidth: '80px',
-                  ...(isActive ? { background: 'var(--gradient-primary)' } : {})
-                }}
+                style={isActive ? { background: 'var(--gradient-primary)' } : {}}
                 aria-current={isActive ? 'page' : undefined}
                 role="tab"
                 aria-selected={isActive}
@@ -65,27 +61,12 @@ const Navigation: React.FC = () => {
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="relative mb-3">
                     <div 
-                      className={`w-7 h-7 flex items-center justify-center transition-transform duration-300 ${
+                      className={`nav-icon flex items-center justify-center transition-transform duration-300 ${
                         isActive ? 'scale-110' : 'group-hover:scale-110'
                       }`}
-                      style={{ 
-                        width: '28px', 
-                        height: '28px',
-                        minWidth: '28px',
-                        minHeight: '28px',
-                        maxWidth: '28px',
-                        maxHeight: '28px',
-                        flexShrink: 0
-                      }}
                     >
                       <Icon 
-                        className="w-full h-full"
-                        style={{ 
-                          width: '28px', 
-                          height: '28px',
-                          maxWidth: '28px',
-                          maxHeight: '28px'
-                        }}
+                        className="nav-icon"
                         aria-hidden="true" 
                       />
                     </div>

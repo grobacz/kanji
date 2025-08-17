@@ -82,8 +82,7 @@ const LevelSelector: React.FC = () => {
         {levels.map((levelInfo, index) => (
           <div 
             key={levelInfo.level}
-            className="animate-slide-up"
-            style={{ animationDelay: `${index * 0.1}s` }}
+            className={`animate-slide-up animate-delay-${index}00`}
           >
             <button
               onClick={() => handleLevelSelect(levelInfo.level)}
@@ -94,8 +93,7 @@ const LevelSelector: React.FC = () => {
               }`}
               style={{ 
                 animationDelay: `${index * 0.5}s`,
-                minHeight: '280px',
-                touchAction: 'manipulation'
+                minHeight: '280px'
               }}
             >
               <div className="p-6 sm:p-8 text-center relative flex flex-col justify-center h-full">
@@ -108,7 +106,7 @@ const LevelSelector: React.FC = () => {
                 )}
                 
                 <div className="relative mb-6">
-                  <div className={`text-6xl sm:text-7xl font-black mb-4 transition-all duration-300 ${
+                  <div className={`kanji-xl font-black mb-4 transition-all duration-300 ${
                     selectedLevel === levelInfo.level 
                       ? 'gradient-text scale-110' 
                       : 'text-slate-700 dark:text-slate-300 group-hover:gradient-text group-hover:scale-105'
@@ -136,8 +134,8 @@ const LevelSelector: React.FC = () => {
         <div className="mt-12 animate-scale-in">
           <div className="glass-card p-8 text-center">
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-4 h-4 bg-gradient-to-r from-success-500 to-success-600 rounded-full flex items-center justify-center" style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', maxWidth: '16px', maxHeight: '16px' }}>
-                <svg className="w-2 h-2 text-white checkmark-svg" fill="currentColor" viewBox="0 0 20 20" style={{ width: '8px', height: '8px', maxWidth: '8px', maxHeight: '8px', minWidth: '8px', minHeight: '8px' }}>
+              <div className="checkmark-container bg-gradient-to-r from-success-500 to-success-600 rounded-full flex items-center justify-center">
+                <svg className="checkmark-icon text-white" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
               </div>
@@ -157,18 +155,13 @@ const LevelSelector: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4 mt-6 justify-center w-full">
                 <a
                   href="/write"
-                  className="button-base px-8 py-4 text-lg font-bold flex-1 sm:flex-none touch-manipulation"
-                  style={{ minHeight: '56px' }}
+                  className="button-base btn-large text-lg font-bold flex-1 sm:flex-none touch-manipulation"
                 >
                   ✍️ Start Writing Practice
                 </a>
                 <a
                   href="/flashcards"
-                  className="button-base px-8 py-4 text-lg font-bold flex-1 sm:flex-none touch-manipulation"
-                  style={{ 
-                    background: 'var(--gradient-secondary)',
-                    minHeight: '56px'
-                  }}
+                  className="button-base button-secondary btn-large text-lg font-bold flex-1 sm:flex-none touch-manipulation"
                 >
                   🃏 Try Flashcards
                 </a>
