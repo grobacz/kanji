@@ -5,9 +5,11 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import DrawingCanvas from './DrawingCanvas';
 import KanjiReference from './KanjiReference';
+import ZenMode from './ZenMode';
 // import { validateKanjiDrawing, StrokeData, ValidationResult } from '../../utils/strokeValidation';
 import { ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../common/LoadingSpinner';
+import { useFeedback } from '../../hooks/useFeedback';
 import toast from 'react-hot-toast';
 
 interface DrawingCanvasRef {
@@ -39,7 +41,9 @@ const WritingPractice: React.FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [showReference, setShowReference] = useState(false);
   const [sessionStats, setSessionStats] = useState({ attempts: 0, goodAttempts: 0 });
+  const [zenMode, setZenMode] = useState(false);
   const canvasRef = useRef<DrawingCanvasRef>(null);
+  const feedback = useFeedback();
 
   const currentKanji = kanjiData?.[currentKanjiIndex];
 
@@ -62,12 +66,14 @@ const WritingPractice: React.FC = () => {
     };
     
     setStrokes(prev => [...prev, newStroke]);
+    feedback.drawing(); // Subtle haptic feedback for drawing
   };
 
   const handleClear = () => {
     setStrokes([]);
     setValidationResult(null);
     canvasRef.current?.clear(); // Clear canvas via ref
+    feedback.buttonClick();
     toast.success('Canvas cleared');
   };
 
@@ -101,28 +107,34 @@ const WritingPractice: React.FC = () => {
       goodAttempts: prev.goodAttempts + (result.score >= 70 ? 1 : 0)
     }));
 
-    // Show toast feedback
+    // Show toast feedback with haptic/sound
     if (result.score >= 90) {
+      feedback.success();
       toast.success('Excellent! 🎉');
     } else if (result.score >= 70) {
+      feedback.success();
       toast.success('Good job! 👏');
     } else {
+      feedback.buttonClick();
       toast('Keep practicing! 💪', { icon: '📝' });
     }
   };
 
   const handleNextKanji = () => {
     if (!kanjiData || currentKanjiIndex >= kanjiData.length - 1) return;
+    feedback.buttonClick();
     setCurrentKanjiIndex(prev => prev + 1);
   };
 
   const handlePreviousKanji = () => {
     if (currentKanjiIndex <= 0) return;
+    feedback.buttonClick();
     setCurrentKanjiIndex(prev => prev - 1);
   };
 
   const handleNewKanji = () => {
     if (!kanjiData) return;
+    feedback.buttonClick();
     const randomIndex = Math.floor(Math.random() * kanjiData.length);
     setCurrentKanjiIndex(randomIndex);
   };
@@ -310,6 +322,12 @@ const WritingPractice: React.FC = () => {
               Clear
             </button>
             <button
+              onClick={() => setZenMode(true)}
+              className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              🧘 Zen Mode
+            </button>
+            <button
               onClick={handleValidate}
               disabled={isValidating || strokes.length === 0}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
@@ -393,6 +411,15 @@ const WritingPractice: React.FC = () => {
           </div>
         </motion.div>
       </div>
+
+      {/* Zen Mode */}
+      {currentKanji && (
+        <ZenMode 
+          kanji={currentKanji}
+          isOpen={zenMode}
+          onClose={() => setZenMode(false)}
+        />
+      )}
     </div>
   );
 };

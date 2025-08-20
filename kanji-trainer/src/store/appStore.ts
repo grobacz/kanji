@@ -4,8 +4,10 @@ import type { AppState, JLPTLevel, Kanji, FlashcardSession } from '../types';
 
 interface AppStore extends AppState {
   flashcardSession: FlashcardSession | null;
+  focusMode: boolean;
   setSelectedLevel: (level: JLPTLevel) => void;
   setCurrentKanji: (kanji: Kanji | null) => void;
+  setFocusMode: (enabled: boolean) => void;
   initializeFlashcardSession: (kanji: Kanji[]) => void;
   nextCard: () => void;
   previousCard: () => void;
@@ -30,8 +32,10 @@ export const useAppStore = create<AppStore>()(
       selectedLevel: null,
       currentKanji: null,
       flashcardSession: null,
+      focusMode: false,
       setSelectedLevel: (level) => set({ selectedLevel: level }),
       setCurrentKanji: (kanji) => set({ currentKanji: kanji }),
+      setFocusMode: (enabled) => set({ focusMode: enabled }),
       initializeFlashcardSession: (kanji: Kanji[]) => {
         const shuffledKanji = shuffleArray(kanji).slice(0, 20);
         set({

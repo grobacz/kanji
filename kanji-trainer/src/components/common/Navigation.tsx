@@ -4,9 +4,12 @@ import {
   PencilIcon,
   BookOpenIcon 
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useFocusMode } from '../../hooks/useFocusMode';
 
 const Navigation: React.FC = () => {
   const location = useLocation();
+  const { focusMode } = useFocusMode();
   
   const navItems = [
     {
@@ -30,10 +33,15 @@ const Navigation: React.FC = () => {
   ];
 
   return (
-    <nav 
-      className="glass-card border-0 mx-4 mb-4 rounded-2xl safe-area-inset-bottom overflow-hidden" 
-      aria-label="Main navigation"
-    >
+    <AnimatePresence>
+      {!focusMode && (
+        <motion.nav
+          initial={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 100 }}
+          transition={{ duration: 0.3 }}
+          className="glass-card border-0 mx-4 mb-4 rounded-2xl safe-area-inset-bottom overflow-hidden" 
+          aria-label="Main navigation"
+        >
       <div className="container mx-auto px-2">
         <div className="flex justify-center" role="tablist" aria-label="Navigation tabs">
           {navItems.map((item) => {
@@ -91,7 +99,9 @@ const Navigation: React.FC = () => {
           })}
         </div>
       </div>
-    </nav>
+        </motion.nav>
+      )}
+    </AnimatePresence>
   );
 };
 

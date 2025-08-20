@@ -1,11 +1,22 @@
 import { useAppStore } from '../../store/appStore';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useFocusMode } from '../../hooks/useFocusMode';
+import ThemeSelector from './ThemeSelector';
 
 const Header: React.FC = () => {
   const selectedLevel = useAppStore((state) => state.selectedLevel);
+  const { focusMode } = useFocusMode();
 
   return (
-    <header className="glass-card border-0 sticky top-0 z-50 safe-area-inset-top mb-4 mx-4 mt-4 rounded-2xl">
+    <AnimatePresence>
+      {!focusMode && (
+        <motion.header
+          initial={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -100 }}
+          transition={{ duration: 0.3 }}
+          className="glass-card border-0 sticky top-0 z-50 safe-area-inset-top mb-4 mx-4 mt-4 rounded-2xl"
+        >
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
@@ -34,9 +45,12 @@ const Header: React.FC = () => {
             )}
           </div>
           
-          <div className="hidden sm:flex items-center shrink-0">
-            <div className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-300 backdrop-blur-sm">
-              🇯🇵 Japanese Kanji Learning
+          <div className="flex items-center space-x-3 shrink-0">
+            <ThemeSelector />
+            <div className="hidden sm:flex items-center">
+              <div className="px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 rounded-lg text-sm font-semibold text-slate-700 dark:text-slate-300 backdrop-blur-sm">
+                🇯🇵 Japanese Kanji Learning
+              </div>
             </div>
           </div>
         </div>
@@ -50,7 +64,9 @@ const Header: React.FC = () => {
       >
         Skip to main content
       </a>
-    </header>
+        </motion.header>
+      )}
+    </AnimatePresence>
   );
 };
 

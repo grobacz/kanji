@@ -5,6 +5,8 @@ import { Suspense, lazy, useEffect } from 'react';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Header from './components/common/Header';
 import Navigation from './components/common/Navigation';
+import FocusExitButton from './components/common/FocusExitButton';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 // Lazy load route components with preloading hints
 const LevelSelector = lazy(() => 
@@ -50,8 +52,9 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ErrorBoundary>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <ErrorBoundary>
         <Router>
           <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:via-blue-900 dark:to-purple-900 flex flex-col relative overflow-hidden">
             {/* Beautiful animated background elements */}
@@ -104,6 +107,7 @@ function App() {
               </Routes>
             </main>
             <Navigation />
+            <FocusExitButton />
           </div>
           <Toaster
             position="top-right"
@@ -116,8 +120,9 @@ function App() {
             }}
           />
         </Router>
-      </ErrorBoundary>
-    </QueryClientProvider>
+        </ErrorBoundary>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 

@@ -1,6 +1,7 @@
 import { useAppStore } from '../../store/appStore';
 import { useKanjiStats } from '../../hooks/useKanjiData';
 import LoadingSpinner from '../common/LoadingSpinner';
+import ConstellationMap from './ConstellationMap';
 import type { JLPTLevel } from '../../types';
 
 const levelInfo: Record<JLPTLevel, { name: string; description: string; defaultCount: number }> = {
@@ -78,57 +79,12 @@ const LevelSelector: React.FC = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        {levels.map((levelInfo, index) => (
-          <div 
-            key={levelInfo.level}
-            className={`animate-slide-up animate-delay-${index}00`}
-          >
-            <button
-              onClick={() => handleLevelSelect(levelInfo.level)}
-              className={`w-full glass-card hover:shadow-glow transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 float-card group touch-manipulation no-tap-highlight ${
-                selectedLevel === levelInfo.level
-                  ? 'ring-4 ring-primary-400 shadow-glow-lg bg-gradient-to-br from-blue-50/80 to-purple-50/80'
-                  : ''
-              }`}
-              style={{ 
-                animationDelay: `${index * 0.5}s`,
-                minHeight: '280px'
-              }}
-            >
-              <div className="p-6 sm:p-8 text-center relative flex flex-col justify-center h-full">
-                {selectedLevel === levelInfo.level && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-success-500 to-success-600 rounded-full flex items-center justify-center animate-bounce-in">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                )}
-                
-                <div className="relative mb-6">
-                  <div className={`kanji-xl font-black mb-4 transition-all duration-300 ${
-                    selectedLevel === levelInfo.level 
-                      ? 'gradient-text scale-110' 
-                      : 'text-slate-700 dark:text-slate-300 group-hover:gradient-text group-hover:scale-105'
-                  }`}>
-                    {levelInfo.name}
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary-400/0 via-primary-400/20 to-primary-400/0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl"></div>
-                </div>
-                
-                <div className="text-xl font-bold text-slate-600 dark:text-slate-400 mb-4 group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors">
-                  {levelInfo.description}
-                </div>
-                
-                <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-full text-base font-semibold text-slate-700 dark:text-slate-300">
-                  <span className="mr-2 text-lg">📚</span>
-                  ~{levelInfo.count} kanji
-                </div>
-              </div>
-            </button>
-          </div>
-        ))}
-      </div>
+      {/* Interactive Constellation Map */}
+      <ConstellationMap
+        levels={levels}
+        selectedLevel={selectedLevel}
+        onLevelSelect={handleLevelSelect}
+      />
 
       {selectedLevel && (
         <div className="mt-12 animate-scale-in">
