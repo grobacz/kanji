@@ -127,11 +127,11 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
         <div className="flex justify-center gap-6 mt-3 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-green-600 font-bold text-lg">{session.correctCount}</span>
-            <span className="text-gray-600">correct</span>
+            <span className="text-gray-600"> correct</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-red-600 font-bold text-lg">{session.incorrectCount}</span>
-            <span className="text-gray-600">review</span>
+            <span className="text-gray-600"> review</span>
           </div>
         </div>
       </div>
@@ -178,7 +178,7 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
                 whileHover={{ scale: 1.02, boxShadow: "0 6px 20px rgba(34, 197, 94, 0.25)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleCorrect}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:flex-none justify-center"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:w-36 justify-center"
               >
                 <CheckIcon className="w-5 h-5" />
                 <span>I knew it!</span>
@@ -187,7 +187,7 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
                 whileHover={{ scale: 1.02, boxShadow: "0 6px 20px rgba(239, 68, 68, 0.25)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleIncorrect}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:flex-none justify-center"
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:w-36 justify-center"
               >
                 <XMarkIcon className="w-5 h-5" />
                 <span>Need practice</span>

@@ -78,11 +78,13 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
                     <span className="text-blue-600">💭</span>
                     Meanings
                   </h3>
-                  <div className="flex flex-wrap justify-center gap-2">
-                    {kanji.meanings.map((meaning, index) => (
+                  <div className="flex flex-wrap justify-center gap-4">
+                    {/* Handle both array and potentially joined meanings */}
+                    {(Array.isArray(kanji.meanings) ? kanji.meanings : kanji.meanings.toString().split(/(?=[A-Z])/)).map((meaning, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex-shrink-0"
+                        className="px-3 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex-shrink-0 mr-2"
+                        style={{ marginRight: '0.5rem' }}
                       >
                         {meaning}
                       </span>
