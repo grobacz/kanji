@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DrawingCanvas from './DrawingCanvas';
 import KanjiReference from './KanjiReference';
 import ZenMode from './ZenMode';
-// import { validateKanjiDrawing, StrokeData, ValidationResult } from '../../utils/strokeValidation';
+import { validateKanjiDrawing } from '../../utils/strokeValidation';
+import type { StrokeData, ValidationResult } from '../../types/strokeValidation';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useFeedback } from '../../hooks/useFeedback';
@@ -16,20 +17,7 @@ interface DrawingCanvasRef {
   clear: () => void;
 }
 
-interface StrokeData {
-  points: number[][];
-  startTime: number;
-  endTime: number;
-}
-
-interface ValidationResult {
-  score: number;
-  isValid: boolean;
-  feedback: string[];
-  strokeCount: { actual: number; expected: number; correct: boolean };
-  coverage: { percentage: number; adequate: boolean };
-  timing: { totalTime: number; averageStrokeTime: number; reasonable: boolean };
-}
+// Types are now imported from strokeValidation.ts
 
 const WritingPractice: React.FC = () => {
   const selectedLevel = useAppStore((state) => state.selectedLevel);
@@ -88,15 +76,8 @@ const WritingPractice: React.FC = () => {
     // Simulate processing time for better UX
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Temporary mock result for dev environment
-    const result = {
-      score: Math.floor(Math.random() * 40) + 60, // Random score 60-100
-      isValid: true,
-      feedback: ['✓ Good attempt!', 'Canvas is working in development!'],
-      strokeCount: { actual: strokes.length, expected: currentKanji.strokes, correct: true },
-      coverage: { percentage: 75, adequate: true },
-      timing: { totalTime: 2000, averageStrokeTime: 500, reasonable: true }
-    };
+    // Use the real validation system
+    const result = validateKanjiDrawing(currentKanji, strokes, 400, 400);
     
     setValidationResult(result);
     setIsValidating(false);

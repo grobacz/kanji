@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { StrokeValidator, validateKanjiDrawing, StrokeData } from './strokeValidation';
+import { StrokeValidator, validateKanjiDrawing } from './strokeValidation';
+import type { StrokeData } from '../types/strokeValidation';
 import type { Kanji } from '../types';
 
 const mockKanji: Kanji = {
@@ -93,13 +94,13 @@ describe('StrokeValidator', () => {
     it('should validate adequate coverage', () => {
       const validator = new StrokeValidator(mockKanji, 400, 400);
       const strokes = [
-        createMockStroke([[50, 50], [350, 350]]) // Diagonal stroke covering good area
+        createMockStroke([[100, 100], [250, 250]]) // Diagonal stroke covering reasonable area for simple kanji
       ];
       
       const result = validator.validateStrokes(strokes);
       
       expect(result.coverage.adequate).toBe(true);
-      expect(result.coverage.percentage).toBeGreaterThan(10);
+      expect(result.coverage.percentage).toBeGreaterThan(8); // Updated minimum for simple kanji
     });
 
     it('should detect inadequate coverage', () => {
@@ -156,13 +157,16 @@ describe('StrokeValidator', () => {
       const perfectResult = validator.validateStrokes(perfectStrokes);
       expect(perfectResult.score).toBeGreaterThanOrEqual(70);
       
-      // Poor attempt
+      // Poor attempt - multiple very tiny strokes, wrong count, bad timing, poor coverage
       const poorStrokes = [
-        createMockStroke([[200, 200], [201, 201]], 50),
-        createMockStroke([[202, 202], [203, 203]], 50),
+        createMockStroke([[200, 200], [200, 201]], 30), // 1px vertical, too fast
+        createMockStroke([[201, 200], [202, 200]], 30), // 1px horizontal, too fast  
+        createMockStroke([[200, 201], [201, 202]], 30), // 1px diagonal, too fast
+        createMockStroke([[202, 201], [203, 202]], 30), // 1px diagonal, too fast
+        createMockStroke([[203, 202], [204, 203]], 30), // 1px diagonal, too fast (5 strokes for 1-stroke kanji)
       ];
       const poorResult = validator.validateStrokes(poorStrokes);
-      expect(poorResult.score).toBeLessThan(40);
+      expect(poorResult.score).toBeLessThan(30); // Very poor attempt should score very low
     });
   });
 

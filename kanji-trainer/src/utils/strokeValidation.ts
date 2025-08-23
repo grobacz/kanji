@@ -1,30 +1,5 @@
 import type { Kanji } from '../types';
-
-export interface StrokeData {
-  points: number[][];
-  startTime: number;
-  endTime: number;
-}
-
-export interface ValidationResult {
-  isValid: boolean;
-  score: number; // 0-100
-  feedback: string[];
-  strokeCount: {
-    expected: number;
-    actual: number;
-    correct: boolean;
-  };
-  timing: {
-    totalTime: number;
-    averageStrokeTime: number;
-    reasonable: boolean;
-  };
-  coverage: {
-    percentage: number;
-    adequate: boolean;
-  };
-}
+import type { StrokeData, ValidationResult } from '../types/strokeValidation';
 
 export class StrokeValidator {
   private kanji: Kanji;
@@ -118,20 +93,42 @@ export class StrokeValidator {
 
     const drawingWidth = maxX - minX;
     const drawingHeight = maxY - minY;
+    
+    // More precise coverage calculation
+    const usableCanvasArea = (this.canvasWidth * 0.8) * (this.canvasHeight * 0.8); // 80% of canvas is reasonable
     const drawingArea = drawingWidth * drawingHeight;
+    
+    // Calculate actual coverage percentage based on usable area
+    const percentage = Math.min(100, (drawingArea / usableCanvasArea) * 100);
 
-    // Expected area based on canvas size (should use at least 30% of canvas)
-    const canvasArea = this.canvasWidth * this.canvasHeight;
-    const percentage = Math.min(100, (drawingArea / canvasArea) * 100);
+    // More stringent coverage requirements:
+    // Simple kanji (1-5 strokes): need 8-15% coverage
+    // Medium kanji (6-10 strokes): need 12-25% coverage  
+    // Complex kanji (11+ strokes): need 18-35% coverage
+    let minCoverage: number;
+    let maxCoverage: number;
+    
+    if (this.kanji.strokes <= 5) {
+      minCoverage = 8;
+      maxCoverage = 35;
+    } else if (this.kanji.strokes <= 10) {
+      minCoverage = 12;
+      maxCoverage = 45;
+    } else {
+      minCoverage = 18;
+      maxCoverage = 60;
+    }
 
-    // Coverage is adequate if it uses reasonable portion of canvas
-    // Adjust based on kanji complexity (stroke count)
-    const minCoverage = Math.min(15, Math.max(5, this.kanji.strokes * 1.5));
-    const adequate = percentage >= minCoverage;
+    // Check if drawing is too small OR too large
+    const adequate = percentage >= minCoverage && percentage <= maxCoverage;
+
+    // Additional check: ensure minimum dimensions
+    const minDimension = Math.min(this.canvasWidth, this.canvasHeight) * 0.15; // 15% of smaller dimension
+    const dimensionsAdequate = drawingWidth >= minDimension && drawingHeight >= minDimension;
 
     return {
       percentage: Math.round(percentage),
-      adequate,
+      adequate: adequate && dimensionsAdequate,
     };
   }
 
@@ -169,7 +166,7 @@ export class StrokeValidator {
   private generateFeedback(
     strokeCount: { correct: boolean; expected: number; actual: number },
     timing: { reasonable: boolean; averageStrokeTime: number },
-    coverage: { adequate: boolean },
+    coverage: { adequate: boolean; percentage: number },
     direction: { reasonable: boolean }
   ): string[] {
     const feedback: string[] = [];
@@ -192,11 +189,28 @@ export class StrokeValidator {
       feedback.push('Good attention to detail - you can try being a bit quicker');
     }
 
-    // Coverage feedback
+    // Enhanced coverage feedback
     if (coverage.adequate) {
-      feedback.push('✓ Good use of the writing space');
+      feedback.push('✓ Good size and proportion');
     } else {
-      feedback.push('Try making your kanji larger - use more of the writing area');
+      // More specific coverage feedback based on kanji complexity and actual percentage
+      let minCoverage: number, maxCoverage: number;
+      
+      if (this.kanji.strokes <= 5) {
+        minCoverage = 8; maxCoverage = 35;
+      } else if (this.kanji.strokes <= 10) {
+        minCoverage = 12; maxCoverage = 45;
+      } else {
+        minCoverage = 18; maxCoverage = 60;
+      }
+
+      if (coverage.percentage < minCoverage) {
+        feedback.push(`Your drawing is too small (${coverage.percentage}% coverage). Make it larger to fill more space.`);
+      } else if (coverage.percentage > maxCoverage) {
+        feedback.push(`Your drawing is too large (${coverage.percentage}% coverage). Try to keep it more compact.`);
+      } else {
+        feedback.push('Check that your drawing has proper proportions and isn\'t too narrow or wide.');
+      }
     }
 
     // Direction feedback
@@ -233,12 +247,28 @@ export class StrokeValidator {
       score += 10; // Partial credit for effort
     }
 
-    // Coverage (20 points max)
+    // Coverage (20 points max) - more stringent scoring
     if (coverage.adequate) {
       score += 20;
     } else {
-      // Partial credit based on coverage percentage
-      score += Math.min(20, coverage.percentage);
+      // More stringent partial credit - poor coverage gets much lower scores
+      let minCoverage: number;
+      if (this.kanji.strokes <= 5) {
+        minCoverage = 8;
+      } else if (this.kanji.strokes <= 10) {
+        minCoverage = 12;
+      } else {
+        minCoverage = 18;
+      }
+      
+      if (coverage.percentage < minCoverage / 2) {
+        // Very small drawings get minimal points
+        score += Math.max(0, coverage.percentage * 0.5);
+      } else {
+        // Partial credit with penalty for inadequate coverage
+        const coverageRatio = coverage.percentage / minCoverage;
+        score += Math.min(15, coverageRatio * 15);
+      }
     }
 
     // Direction (20 points max)
