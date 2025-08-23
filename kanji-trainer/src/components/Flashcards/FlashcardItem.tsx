@@ -61,17 +61,17 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             transition={{ duration: 0.3, ease: "easeInOut" }}
             className="absolute inset-0 w-full h-full bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl border-2 border-blue-200/60 flex flex-col"
           >
-            <div className="flex flex-col h-full p-4 sm:p-6 min-h-0">
+            <div className="flex flex-col h-full p-4 sm:p-6 min-h-0 pb-20">
               {/* Header with kanji - Fixed size */}
               <div className="text-center mb-4 flex-shrink-0">
-                <div className="text-3xl sm:text-4xl font-bold text-gray-900 kanji-text mb-2">
+                <div className="text-5xl sm:text-6xl font-bold text-gray-900 kanji-text kanji-md mb-2">
                   {kanji.character}
                 </div>
                 <div className="h-px bg-gradient-to-r from-transparent via-blue-300 to-transparent"></div>
               </div>
               
               {/* Scrollable content area - Takes remaining space */}
-              <div className="flex-1 overflow-y-auto min-h-0 space-y-4 p-2">
+              <div className="flex-1 overflow-y-auto min-h-0 space-y-4 p-2 pb-6">
                 {/* Meanings Section */}
                 <div className="space-y-2">
                   <h3 className="text-lg sm:text-xl font-bold text-gray-800 text-center flex items-center justify-center gap-2">
@@ -142,7 +142,7 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
               </div>
 
               {/* Footer - metadata - Fixed size */}
-              <div className="mt-4 text-center text-xs sm:text-sm text-gray-600 bg-white/70 backdrop-blur-sm px-3 py-2 rounded-xl flex-shrink-0 border border-gray-200 shadow-sm">
+              <div className="absolute bottom-4 left-4 right-4 text-center text-xs sm:text-sm text-gray-600 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl border border-gray-200 shadow-sm">
                 <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
                   <span className="inline-flex items-center gap-1 font-medium">
                     <span className="text-orange-500">✏️</span>

@@ -392,6 +392,10 @@
     font-size: clamp(8rem, 20vw, 12rem);
   }
 
+  .kanji-md {
+    font-size: clamp(2.5rem, 4vw, 3rem);
+  }
+
   /* Card sizing utilities */
   .card-height-clamp {
     height: clamp(350px, 60vh, 500px);
