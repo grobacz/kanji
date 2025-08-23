@@ -40,7 +40,8 @@
       "mcp__filesystem__read_text_file",
       "Bash(npm test:*)",
       "mcp__filesystem__read_multiple_files",
-      "mcp__gemini-cli__brainstorm"
+      "mcp__gemini-cli__brainstorm",
+      "mcp__gemini-cli__ask-gemini"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

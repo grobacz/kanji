@@ -68,10 +68,10 @@ const FlashcardItem: React.FC<FlashcardItemProps> = ({
             </div>
             
             {/* Scrollable content area - Takes remaining space */}
-            <div className="flex-1 overflow-y-auto min-h-0 space-y-4">
+            <div className="flex-1 overflow-y-auto min-h-0 space-y-4 p-2">
               {/* Meanings Section */}
-              <div className="min-h-0">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 text-center flex-shrink-0 flex items-center justify-center gap-2">
+              <div className="space-y-2">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-800 text-center flex items-center justify-center gap-2">
                   <span className="text-blue-600">💭</span>
                   Meanings
                 </h3>
