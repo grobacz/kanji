@@ -228,7 +228,7 @@ const WritingPractice: React.FC = () => {
         >
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="text-center mb-4">
-              <div className="text-8xl font-bold mb-4 kanji-text text-gray-900">
+              <div className="font-bold mb-4 kanji-text kanji-xl text-gray-900">
                 {currentKanji.character}
               </div>
               <div className="space-y-2 text-sm text-gray-600">
