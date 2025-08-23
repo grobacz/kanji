@@ -219,11 +219,11 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
         {/* Previous/Next buttons side by side */}
         <div style={{ 
           display: 'flex', 
-          justifyContent: 'center', 
           alignItems: 'center', 
           gap: '16px', 
           width: '100%', 
-          margin: '0 auto' 
+          margin: '0 auto',
+          padding: '8px'
         }}>
           <button
             onClick={onPrevious}
