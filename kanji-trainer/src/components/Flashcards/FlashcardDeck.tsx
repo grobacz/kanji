@@ -223,7 +223,7 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
           gap: '16px', 
           width: '100%', 
           margin: '0 auto',
-          padding: '8px'
+          padding: '8px 0'
         }}>
           <button
             onClick={onPrevious}
