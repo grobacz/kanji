@@ -178,19 +178,19 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
                 whileHover={{ scale: 1.02, boxShadow: "0 6px 20px rgba(34, 197, 94, 0.25)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleCorrect}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:w-36 justify-center"
+                className="flex items-center justify-center bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-semibold shadow-md"
+                style={{ width: '64px', height: '64px', minWidth: '64px', minHeight: '64px' }}
               >
-                <CheckIcon className="w-5 h-5" />
-                <span>I knew it!</span>
+                <CheckIcon className="w-8 h-8" />
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02, boxShadow: "0 6px 20px rgba(239, 68, 68, 0.25)" }}
                 whileTap={{ scale: 0.98 }}
                 onClick={handleIncorrect}
-                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold shadow-md flex-1 sm:w-36 justify-center"
+                className="flex items-center justify-center bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition-all duration-200 font-semibold shadow-md"
+                style={{ width: '64px', height: '64px', minWidth: '64px', minHeight: '64px' }}
               >
-                <XMarkIcon className="w-5 h-5" />
-                <span>Need practice</span>
+                <XMarkIcon className="w-8 h-8" />
               </motion.button>
             </div>
           </motion.div>
