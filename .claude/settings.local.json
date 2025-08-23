@@ -44,7 +44,8 @@
       "mcp__gemini-cli__ask-gemini",
       "mcp__chrome__chrome_navigate",
       "WebFetch(domain:docs.anthropic.com)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"
