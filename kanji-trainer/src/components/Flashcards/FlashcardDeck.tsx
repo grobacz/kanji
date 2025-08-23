@@ -32,8 +32,6 @@ const FlashcardDeck: React.FC<FlashcardDeckProps> = ({
   const accuracy = session.correctCount + session.incorrectCount > 0 
     ? Math.round((session.correctCount / (session.correctCount + session.incorrectCount)) * 100) 
     : 0;
-  const isHalfway = session.currentIndex >= Math.floor(session.totalCount / 2);
-  const isNearEnd = session.currentIndex >= Math.floor(session.totalCount * 0.8);
 
   // Swipe gestures for navigation with haptic feedback
   const swipeGestures = useSwipeGestures({
