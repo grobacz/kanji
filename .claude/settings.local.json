@@ -42,7 +42,8 @@
       "mcp__filesystem__read_multiple_files",
       "mcp__gemini-cli__brainstorm",
       "mcp__gemini-cli__ask-gemini",
-      "mcp__chrome__chrome_navigate"
+      "mcp__chrome__chrome_navigate",
+      "WebFetch(domain:docs.anthropic.com)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

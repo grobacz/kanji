@@ -50,6 +50,12 @@ const ZenMode: React.FC<ZenModeProps> = ({ kanji, isOpen, onClose }) => {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
+  const handleClear = useCallback(() => {
+    canvasRef.current?.clear();
+    setStrokeCount(0);
+    feedback.buttonClick();
+  }, [feedback]);
+
   // Handle escape key
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -79,12 +85,6 @@ const ZenMode: React.FC<ZenModeProps> = ({ kanji, isOpen, onClose }) => {
     setStrokeCount(prev => prev + 1);
     feedback.drawing();
   };
-
-  const handleClear = useCallback(() => {
-    canvasRef.current?.clear();
-    setStrokeCount(0);
-    feedback.buttonClick();
-  }, [feedback]);
 
   const handleClose = () => {
     feedback.buttonClick();
