@@ -7,7 +7,7 @@ import DrawingCanvas from './DrawingCanvas';
 import KanjiReference from './KanjiReference';
 import ZenMode from './ZenMode';
 // import { validateKanjiDrawing, StrokeData, ValidationResult } from '../../utils/strokeValidation';
-import { ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useFeedback } from '../../hooks/useFeedback';
 import toast from 'react-hot-toast';
@@ -132,12 +132,6 @@ const WritingPractice: React.FC = () => {
     setCurrentKanjiIndex(prev => prev - 1);
   };
 
-  const handleNewKanji = () => {
-    if (!kanjiData) return;
-    feedback.buttonClick();
-    const randomIndex = Math.floor(Math.random() * kanjiData.length);
-    setCurrentKanjiIndex(randomIndex);
-  };
 
   if (!selectedLevel) {
     return (
@@ -238,29 +232,72 @@ const WritingPractice: React.FC = () => {
               </div>
             </div>
             
-            <div className="flex gap-2 justify-center">
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '16px', 
+              width: '100%', 
+              margin: '0 auto',
+              padding: '8px 0'
+            }}>
               <button
                 onClick={handlePreviousKanji}
                 disabled={currentKanjiIndex === 0}
-                className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '150px',
+                  height: '50px',
+                  padding: '0',
+                  margin: '0',
+                  backgroundColor: currentKanjiIndex === 0 ? '#f3f4f6' : '#ffffff',
+                  color: currentKanjiIndex === 0 ? '#9ca3af' : '#374151',
+                  border: currentKanjiIndex === 0 ? '1px solid #d1d5db' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: currentKanjiIndex === 0 ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                  flexShrink: 0,
+                  flexGrow: 0,
+                  boxSizing: 'border-box'
+                }}
               >
-                <ChevronLeftIcon className="w-4 h-4" />
-                Previous
+                <ChevronLeftIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
+                <span style={{ flexShrink: 0 }}>Previous</span>
               </button>
-              <button
-                onClick={handleNewKanji}
-                className="flex items-center gap-1 px-3 py-2 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded transition-colors"
-              >
-                <ArrowPathIcon className="w-4 h-4" />
-                Random
-              </button>
+
               <button
                 onClick={handleNextKanji}
                 disabled={currentKanjiIndex >= kanjiData.length - 1}
-                className="flex items-center gap-1 px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '150px',
+                  height: '50px',
+                  padding: '0',
+                  margin: '0',
+                  backgroundColor: currentKanjiIndex >= kanjiData.length - 1 ? '#f3f4f6' : '#ffffff',
+                  color: currentKanjiIndex >= kanjiData.length - 1 ? '#9ca3af' : '#374151',
+                  border: currentKanjiIndex >= kanjiData.length - 1 ? '1px solid #d1d5db' : '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: currentKanjiIndex >= kanjiData.length - 1 ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                  flexShrink: 0,
+                  flexGrow: 0,
+                  boxSizing: 'border-box'
+                }}
               >
-                Next
-                <ChevronRightIcon className="w-4 h-4" />
+                <span style={{ flexShrink: 0 }}>Next</span>
+                <ChevronRightIcon style={{ width: '16px', height: '16px', flexShrink: 0 }} />
               </button>
             </div>
           </div>

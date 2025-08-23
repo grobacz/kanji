@@ -98,17 +98,6 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
     }
   }, [isAnimating]);
 
-  const showStrokes = () => {
-    if (writerRef.current) {
-      writerRef.current.showCharacter();
-    }
-  };
-
-  const hideStrokes = () => {
-    if (writerRef.current) {
-      writerRef.current.hideCharacter();
-    }
-  };
 
   // Auto-animate if requested
   useEffect(() => {
@@ -140,18 +129,6 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
             } transition-colors`}
           >
             {isAnimating ? 'Animating...' : 'Show Animation'}
-          </button>
-          <button
-            onClick={showStrokes}
-            className="px-3 py-1 text-sm bg-green-100 text-green-700 hover:bg-green-200 rounded transition-colors"
-          >
-            Show Strokes
-          </button>
-          <button
-            onClick={hideStrokes}
-            className="px-3 py-1 text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 rounded transition-colors"
-          >
-            Hide Strokes
           </button>
         </div>
       )}
