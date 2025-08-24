@@ -133,9 +133,15 @@ export class StrokeValidator {
   }
 
   private validateStrokeDirection(strokes: StrokeData[]) {
-    // Simple heuristic: check if strokes generally follow top-to-bottom, left-to-right pattern
-    let topToBottomScore = 0;
-    let leftToRightScore = 0;
+    if (strokes.length === 0) {
+      return {
+        score: 0,
+        reasonable: false,
+      };
+    }
+
+    let goodDirectionCount = 0;
+    let totalStrokesAnalyzed = 0;
 
     strokes.forEach(stroke => {
       if (stroke.points.length < 2) return;
@@ -146,20 +152,41 @@ export class StrokeValidator {
       // Check general direction
       const deltaX = end[0] - start[0];
       const deltaY = end[1] - start[1];
+      
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      // Skip very short strokes (likely dots or tiny marks)
+      if (distance < 10) return;
+      
+      totalStrokesAnalyzed += 1;
 
-      // Prefer strokes that go generally downward or rightward
-      if (deltaY >= 0) topToBottomScore += 1;
-      if (Math.abs(deltaX) <= Math.abs(deltaY) * 2) leftToRightScore += 1; // Allow some horizontal variation
+      // Analyze stroke direction more strictly
+      // Good strokes should generally:
+      // 1. Go downward (deltaY > 0) OR
+      // 2. Go rightward (deltaX > 0) OR  
+      // 3. Be predominantly vertical/horizontal (not diagonal)
+      
+      const isDownward = deltaY > Math.abs(deltaX) * 0.3; // More downward than diagonal
+      const isRightward = deltaX > Math.abs(deltaY) * 0.3; // More rightward than diagonal
+      const isHorizontal = Math.abs(deltaX) > Math.abs(deltaY) * 2 && deltaX > 0; // Clearly horizontal and rightward
+      const isVertical = Math.abs(deltaY) > Math.abs(deltaX) * 2 && deltaY > 0; // Clearly vertical and downward
+      
+      // A stroke is "good" if it follows basic kanji stroke principles
+      if (isDownward || isRightward || isHorizontal || isVertical) {
+        goodDirectionCount += 1;
+      }
     });
 
-    const totalStrokes = strokes.length;
-    const directionScore = totalStrokes > 0 
-      ? (topToBottomScore + leftToRightScore) / (totalStrokes * 2) 
+    const directionScore = totalStrokesAnalyzed > 0 
+      ? goodDirectionCount / totalStrokesAnalyzed 
       : 0;
+
+    // Be more strict about direction - at least 70% of strokes should have reasonable direction
+    const reasonable = directionScore >= 0.7;
 
     return {
       score: directionScore,
-      reasonable: directionScore >= 0.6 || totalStrokes <= 3, // More lenient for simple kanji
+      reasonable,
     };
   }
 
