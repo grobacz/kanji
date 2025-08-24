@@ -1,5 +1,15 @@
 import type { Kanji } from '../types';
-import type { StrokeData, ValidationResult } from '../types/strokeValidation';
+import type { StrokeData, ValidationResult, StrokeMatch } from '../types/strokeValidation';
+
+declare global {
+  interface Window {
+    HanziWriter: any;
+  }
+}
+
+interface HanziWriterCharData {
+  strokes: string[];
+}
 
 export class StrokeValidator {
   private kanji: Kanji;
@@ -12,14 +22,33 @@ export class StrokeValidator {
     this.canvasHeight = canvasHeight;
   }
 
-  validateStrokes(strokes: StrokeData[]): ValidationResult {
+  async validateStrokes(strokes: StrokeData[]): Promise<ValidationResult> {
     const strokeCount = this.validateStrokeCount(strokes);
     const timing = this.validateTiming(strokes);
     const coverage = this.validateCoverage(strokes);
-    const direction = this.validateStrokeDirection(strokes);
+    
+    // Try to get actual stroke data for precise validation
+    let strokeMatches: StrokeMatch[] | undefined;
+    let direction: { score: number; reasonable: boolean };
+    
+    try {
+      const charData = await this.loadCharacterData();
+      if (charData) {
+        console.info(`✓ Using HanziWriter stroke data for ${this.kanji.character} (${charData.strokes.length} strokes)`);
+        strokeMatches = this.validateAgainstActualStrokes(strokes, charData);
+        direction = this.calculateDirectionFromMatches(strokeMatches);
+      } else {
+        console.warn(`⚠ HanziWriter data not available for ${this.kanji.character}, using fallback validation`);
+        // Fallback to generic direction validation
+        direction = this.validateStrokeDirection(strokes);
+      }
+    } catch (error) {
+      console.warn('Could not load character data, using fallback validation:', error);
+      direction = this.validateStrokeDirection(strokes);
+    }
 
-    const feedback = this.generateFeedback(strokeCount, timing, coverage, direction);
-    const score = this.calculateScore(strokeCount, timing, coverage, direction);
+    const feedback = this.generateFeedback(strokeCount, timing, coverage, direction, strokeMatches);
+    const score = this.calculateScore(strokeCount, timing, coverage, direction, strokeMatches);
 
     return {
       isValid: score >= 60,
@@ -28,6 +57,179 @@ export class StrokeValidator {
       strokeCount,
       timing,
       coverage,
+      strokeMatches,
+    };
+  }
+
+  private async loadCharacterData(): Promise<HanziWriterCharData | null> {
+    return new Promise((resolve) => {
+      // Check if HanziWriter is available
+      if (typeof window === 'undefined' || !window.HanziWriter) {
+        resolve(null);
+        return;
+      }
+
+      window.HanziWriter.loadCharacterData(this.kanji.character)
+        .then((charData: HanziWriterCharData) => {
+          resolve(charData);
+        })
+        .catch((error: any) => {
+          console.warn(`Failed to load character data for ${this.kanji.character}:`, error);
+          resolve(null);
+        });
+    });
+  }
+
+  private validateAgainstActualStrokes(userStrokes: StrokeData[], charData: HanziWriterCharData): StrokeMatch[] {
+    const expectedStrokes = charData.strokes;
+    const matches: StrokeMatch[] = [];
+
+    for (let i = 0; i < Math.max(userStrokes.length, expectedStrokes.length); i++) {
+      const userStroke = userStrokes[i];
+      const expectedStrokePath = expectedStrokes[i];
+
+      if (!userStroke && expectedStrokePath) {
+        // Missing stroke
+        matches.push({
+          strokeIndex: i,
+          isCorrect: false,
+          similarity: 0,
+          feedback: `Missing stroke ${i + 1}`
+        });
+      } else if (userStroke && !expectedStrokePath) {
+        // Extra stroke
+        matches.push({
+          strokeIndex: i,
+          isCorrect: false,
+          similarity: 0,
+          feedback: `Extra stroke ${i + 1} - this kanji only has ${expectedStrokes.length} strokes`
+        });
+      } else if (userStroke && expectedStrokePath) {
+        // Compare actual strokes
+        const similarity = this.compareStrokeToPath(userStroke, expectedStrokePath);
+        const isCorrect = similarity >= 0.6; // Threshold for "correct" stroke
+
+        matches.push({
+          strokeIndex: i,
+          isCorrect,
+          similarity,
+          feedback: this.generateStrokeFeedback(i + 1, similarity, isCorrect)
+        });
+      }
+    }
+
+    return matches;
+  }
+
+  private compareStrokeToPath(userStroke: StrokeData, expectedPath: string): number {
+    // This is a simplified stroke comparison
+    // In a production app, you'd want more sophisticated path matching
+    
+    if (userStroke.points.length < 2) return 0;
+
+    // Parse SVG path to get key points (simplified approach)
+    const pathPoints = this.extractKeyPointsFromSVGPath(expectedPath);
+    if (pathPoints.length < 2) return 0.5; // Give some credit for effort
+
+    // Compare start and end points (scaled to our canvas)
+    const userStart = userStroke.points[0];
+    const userEnd = userStroke.points[userStroke.points.length - 1];
+    
+    const expectedStart = this.scalePointToCanvas(pathPoints[0]);
+    const expectedEnd = this.scalePointToCanvas(pathPoints[pathPoints.length - 1]);
+
+    // Calculate distance similarity
+    const startDistance = this.calculateDistance(userStart, expectedStart);
+    const endDistance = this.calculateDistance(userEnd, expectedEnd);
+    
+    const maxCanvasDistance = Math.sqrt(this.canvasWidth * this.canvasWidth + this.canvasHeight * this.canvasHeight);
+    
+    const startSimilarity = Math.max(0, 1 - (startDistance / (maxCanvasDistance * 0.3)));
+    const endSimilarity = Math.max(0, 1 - (endDistance / (maxCanvasDistance * 0.3)));
+    
+    // Simple direction comparison
+    const userDirection = [userEnd[0] - userStart[0], userEnd[1] - userStart[1]];
+    const expectedDirection = [expectedEnd[0] - expectedStart[0], expectedEnd[1] - expectedStart[1]];
+    
+    const directionSimilarity = this.calculateDirectionSimilarity(userDirection, expectedDirection);
+
+    // Combined score: 40% start, 40% end, 20% direction
+    return (startSimilarity * 0.4) + (endSimilarity * 0.4) + (directionSimilarity * 0.2);
+  }
+
+  private extractKeyPointsFromSVGPath(pathString: string): number[][] {
+    // Very simplified SVG path parsing - just extract move and line commands
+    // HanziWriter paths are in 1024x1024 coordinate system
+    const points: number[][] = [];
+    const commands = pathString.match(/[MLZ][^MLZ]*/g) || [];
+    
+    for (const command of commands) {
+      const type = command[0];
+      const coords = command.slice(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
+      
+      if ((type === 'M' || type === 'L') && coords.length >= 2) {
+        points.push([coords[0], coords[1]]);
+      }
+    }
+    
+    return points;
+  }
+
+  private scalePointToCanvas(point: number[]): number[] {
+    // Scale from HanziWriter's 1024x1024 coordinate system to our canvas
+    const scaleFactor = Math.min(this.canvasWidth, this.canvasHeight) / 1024;
+    const offsetX = (this.canvasWidth - 1024 * scaleFactor) / 2;
+    const offsetY = (this.canvasHeight - 1024 * scaleFactor) / 2;
+    
+    return [
+      point[0] * scaleFactor + offsetX,
+      point[1] * scaleFactor + offsetY
+    ];
+  }
+
+  private calculateDistance(point1: number[], point2: number[]): number {
+    const dx = point1[0] - point2[0];
+    const dy = point1[1] - point2[1];
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  private calculateDirectionSimilarity(dir1: number[], dir2: number[]): number {
+    // Normalize vectors
+    const len1 = Math.sqrt(dir1[0] * dir1[0] + dir1[1] * dir1[1]);
+    const len2 = Math.sqrt(dir2[0] * dir2[0] + dir2[1] * dir2[1]);
+    
+    if (len1 === 0 || len2 === 0) return 0.5;
+    
+    const norm1 = [dir1[0] / len1, dir1[1] / len1];
+    const norm2 = [dir2[0] / len2, dir2[1] / len2];
+    
+    // Dot product gives cosine of angle between vectors
+    const dotProduct = norm1[0] * norm2[0] + norm1[1] * norm2[1];
+    
+    // Convert to similarity score (1 = same direction, 0 = opposite)
+    return (dotProduct + 1) / 2;
+  }
+
+  private generateStrokeFeedback(strokeNum: number, similarity: number, isCorrect: boolean): string {
+    if (isCorrect) {
+      if (similarity >= 0.8) return `✓ Stroke ${strokeNum}: Excellent!`;
+      else return `✓ Stroke ${strokeNum}: Good direction`;
+    } else {
+      if (similarity >= 0.4) return `Stroke ${strokeNum}: Close, but check the direction`;
+      else if (similarity >= 0.2) return `Stroke ${strokeNum}: Wrong direction or position`;
+      else return `Stroke ${strokeNum}: Doesn't match expected stroke`;
+    }
+  }
+
+  private calculateDirectionFromMatches(strokeMatches: StrokeMatch[]): { score: number; reasonable: boolean } {
+    if (strokeMatches.length === 0) return { score: 0, reasonable: false };
+    
+    const correctStrokes = strokeMatches.filter(match => match.isCorrect).length;
+    const score = correctStrokes / strokeMatches.length;
+    
+    return {
+      score,
+      reasonable: score >= 0.6
     };
   }
 
@@ -194,20 +396,51 @@ export class StrokeValidator {
     strokeCount: { correct: boolean; expected: number; actual: number },
     timing: { reasonable: boolean; averageStrokeTime: number },
     coverage: { adequate: boolean; percentage: number },
-    direction: { reasonable: boolean }
+    direction: { reasonable: boolean },
+    strokeMatches?: StrokeMatch[]
   ): string[] {
     const feedback: string[] = [];
 
-    // Stroke count feedback
-    if (strokeCount.correct) {
-      feedback.push(`✓ Correct number of strokes (${strokeCount.expected})`);
-    } else if (strokeCount.actual < strokeCount.expected) {
-      feedback.push(`You used ${strokeCount.actual} strokes, but ${this.kanji.character} has ${strokeCount.expected} strokes. Try adding more detail.`);
+    // If we have detailed stroke matches, prioritize that feedback
+    if (strokeMatches && strokeMatches.length > 0) {
+      const correctMatches = strokeMatches.filter(match => match.isCorrect);
+      const totalMatches = strokeMatches.length;
+      
+      if (correctMatches.length === totalMatches) {
+        feedback.push(`✓ All ${totalMatches} strokes match the correct pattern!`);
+      } else if (correctMatches.length === 0) {
+        feedback.push(`None of your strokes match the expected pattern. Try following the stroke order.`);
+      } else {
+        feedback.push(`${correctMatches.length}/${totalMatches} strokes are correct. Check the individual stroke feedback below.`);
+      }
+
+      // Add individual stroke feedback for incorrect strokes
+      strokeMatches.forEach(match => {
+        if (!match.isCorrect) {
+          feedback.push(match.feedback);
+        }
+      });
     } else {
-      feedback.push(`You used ${strokeCount.actual} strokes, but ${this.kanji.character} only has ${strokeCount.expected} strokes. Try to be more efficient.`);
+      // Fallback to generic feedback when no stroke data available
+      
+      // Stroke count feedback
+      if (strokeCount.correct) {
+        feedback.push(`✓ Correct number of strokes (${strokeCount.expected})`);
+      } else if (strokeCount.actual < strokeCount.expected) {
+        feedback.push(`You used ${strokeCount.actual} strokes, but ${this.kanji.character} has ${strokeCount.expected} strokes. Try adding more detail.`);
+      } else {
+        feedback.push(`You used ${strokeCount.actual} strokes, but ${this.kanji.character} only has ${strokeCount.expected} strokes. Try to be more efficient.`);
+      }
+
+      // Direction feedback (fallback)
+      if (direction.reasonable) {
+        feedback.push('✓ Good stroke direction');
+      } else {
+        feedback.push('Remember: Japanese strokes generally go from top to bottom, left to right');
+      }
     }
 
-    // Timing feedback
+    // Timing feedback (always show)
     if (timing.reasonable) {
       feedback.push('✓ Good pacing - not too fast or slow');
     } else if (timing.averageStrokeTime < 200) {
@@ -216,7 +449,7 @@ export class StrokeValidator {
       feedback.push('Good attention to detail - you can try being a bit quicker');
     }
 
-    // Enhanced coverage feedback
+    // Enhanced coverage feedback (always show)
     if (coverage.adequate) {
       feedback.push('✓ Good size and proportion');
     } else {
@@ -240,13 +473,6 @@ export class StrokeValidator {
       }
     }
 
-    // Direction feedback
-    if (direction.reasonable) {
-      feedback.push('✓ Good stroke direction');
-    } else {
-      feedback.push('Remember: Japanese strokes generally go from top to bottom, left to right');
-    }
-
     return feedback;
   }
 
@@ -254,64 +480,151 @@ export class StrokeValidator {
     strokeCount: { correct: boolean; expected: number; actual: number },
     timing: { reasonable: boolean },
     coverage: { adequate: boolean; percentage: number },
-    direction: { score: number }
+    direction: { score: number },
+    strokeMatches?: StrokeMatch[]
   ): number {
     let score = 0;
 
-    // Stroke count (40 points max)
-    if (strokeCount.correct) {
-      score += 40;
-    } else {
-      const diff = Math.abs(strokeCount.actual - strokeCount.expected);
-      const penalty = Math.min(40, diff * 10);
-      score += Math.max(0, 40 - penalty);
-    }
-
-    // Timing (20 points max)
-    if (timing.reasonable) {
-      score += 20;
-    } else {
-      score += 10; // Partial credit for effort
-    }
-
-    // Coverage (20 points max) - more stringent scoring
-    if (coverage.adequate) {
-      score += 20;
-    } else {
-      // More stringent partial credit - poor coverage gets much lower scores
-      let minCoverage: number;
-      if (this.kanji.strokes <= 5) {
-        minCoverage = 8;
-      } else if (this.kanji.strokes <= 10) {
-        minCoverage = 12;
-      } else {
-        minCoverage = 18;
-      }
+    // If we have stroke matches, use more sophisticated scoring
+    if (strokeMatches && strokeMatches.length > 0) {
+      // Stroke accuracy (60 points max) - most important with real stroke data
+      const correctStrokes = strokeMatches.filter(match => match.isCorrect).length;
+      const avgSimilarity = strokeMatches.reduce((sum, match) => sum + match.similarity, 0) / strokeMatches.length;
       
-      if (coverage.percentage < minCoverage / 2) {
-        // Very small drawings get minimal points
-        score += Math.max(0, coverage.percentage * 0.5);
+      // Base stroke accuracy score
+      const strokeAccuracy = correctStrokes / strokeMatches.length;
+      score += strokeAccuracy * 50; // 50 points for correct strokes
+      
+      // Additional points for overall similarity even on incorrect strokes
+      score += avgSimilarity * 10; // Up to 10 additional points for partial similarity
+      
+      // Timing (15 points max - reduced since stroke accuracy is more important)
+      if (timing.reasonable) {
+        score += 15;
       } else {
-        // Partial credit with penalty for inadequate coverage
-        const coverageRatio = coverage.percentage / minCoverage;
-        score += Math.min(15, coverageRatio * 15);
+        score += 7; // Partial credit for effort
       }
-    }
 
-    // Direction (20 points max)
-    score += direction.score * 20;
+      // Coverage (25 points max - still important for overall appearance)
+      if (coverage.adequate) {
+        score += 25;
+      } else {
+        // More generous partial credit when we have good stroke matches
+        let minCoverage: number;
+        if (this.kanji.strokes <= 5) {
+          minCoverage = 8;
+        } else if (this.kanji.strokes <= 10) {
+          minCoverage = 12;
+        } else {
+          minCoverage = 18;
+        }
+        
+        if (coverage.percentage < minCoverage / 2) {
+          score += Math.max(5, coverage.percentage * 0.8);
+        } else {
+          const coverageRatio = coverage.percentage / minCoverage;
+          score += Math.min(20, coverageRatio * 20);
+        }
+      }
+    } else {
+      // Fallback scoring when no stroke data available
+      
+      // Stroke count (40 points max)
+      if (strokeCount.correct) {
+        score += 40;
+      } else {
+        const diff = Math.abs(strokeCount.actual - strokeCount.expected);
+        const penalty = Math.min(40, diff * 10);
+        score += Math.max(0, 40 - penalty);
+      }
+
+      // Timing (20 points max)
+      if (timing.reasonable) {
+        score += 20;
+      } else {
+        score += 10; // Partial credit for effort
+      }
+
+      // Coverage (20 points max)
+      if (coverage.adequate) {
+        score += 20;
+      } else {
+        let minCoverage: number;
+        if (this.kanji.strokes <= 5) {
+          minCoverage = 8;
+        } else if (this.kanji.strokes <= 10) {
+          minCoverage = 12;
+        } else {
+          minCoverage = 18;
+        }
+        
+        if (coverage.percentage < minCoverage / 2) {
+          score += Math.max(0, coverage.percentage * 0.5);
+        } else {
+          const coverageRatio = coverage.percentage / minCoverage;
+          score += Math.min(15, coverageRatio * 15);
+        }
+      }
+
+      // Direction (20 points max)
+      score += direction.score * 20;
+    }
 
     return Math.min(100, Math.max(0, Math.round(score)));
+  }
+
+  // New synchronous method that uses pre-loaded stroke data
+  validateStrokesWithData(strokes: StrokeData[], strokeData: string[] | null): ValidationResult {
+    const strokeCount = this.validateStrokeCount(strokes);
+    const timing = this.validateTiming(strokes);
+    const coverage = this.validateCoverage(strokes);
+    
+    let strokeMatches: StrokeMatch[] | undefined;
+    let direction: { score: number; reasonable: boolean };
+    
+    if (strokeData && strokeData.length > 0) {
+      console.info(`✓ Validating with ${strokeData.length} expected strokes for ${this.kanji.character}`);
+      strokeMatches = this.validateAgainstActualStrokes(strokes, { strokes: strokeData });
+      direction = this.calculateDirectionFromMatches(strokeMatches);
+    } else {
+      console.warn(`⚠ No stroke data available for ${this.kanji.character}, using fallback validation`);
+      direction = this.validateStrokeDirection(strokes);
+    }
+
+    const feedback = this.generateFeedback(strokeCount, timing, coverage, direction, strokeMatches);
+    const score = this.calculateScore(strokeCount, timing, coverage, direction, strokeMatches);
+
+    return {
+      isValid: score >= 60,
+      score,
+      feedback,
+      strokeCount,
+      timing,
+      coverage,
+      strokeMatches,
+    };
   }
 }
 
 // Utility function for easy validation
-export function validateKanjiDrawing(
+export async function validateKanjiDrawing(
   kanji: Kanji,
   strokes: StrokeData[],
   canvasWidth = 400,
   canvasHeight = 400
+): Promise<ValidationResult> {
+  const validator = new StrokeValidator(kanji, canvasWidth, canvasHeight);
+  return await validator.validateStrokes(strokes);
+}
+
+// New utility function that uses pre-loaded stroke data (more efficient)
+export function validateKanjiDrawingWithStrokeData(
+  kanji: Kanji,
+  strokes: StrokeData[],
+  strokeData: string[] | null,
+  canvasWidth = 400,
+  canvasHeight = 400
 ): ValidationResult {
   const validator = new StrokeValidator(kanji, canvasWidth, canvasHeight);
-  return validator.validateStrokes(strokes);
+  return validator.validateStrokesWithData(strokes, strokeData);
 }

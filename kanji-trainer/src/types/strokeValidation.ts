@@ -4,6 +4,13 @@ export interface StrokeData {
   endTime: number;
 }
 
+export interface StrokeMatch {
+  strokeIndex: number;
+  isCorrect: boolean;
+  similarity: number; // 0-1 score
+  feedback: string;
+}
+
 export interface ValidationResult {
   isValid: boolean;
   score: number; // 0-100
@@ -22,4 +29,5 @@ export interface ValidationResult {
     percentage: number;
     adequate: boolean;
   };
+  strokeMatches?: StrokeMatch[]; // Individual stroke analysis
 }

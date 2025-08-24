@@ -1,17 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { Kanji } from '../../types';
-
-declare global {
-  interface Window {
-    HanziWriter: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  }
-}
+import { useHanziWriter } from '../../hooks/useHanziWriter';
 
 interface KanjiReferenceProps {
   kanji: Kanji;
   size?: number;
   showAnimation?: boolean;
   animationSpeed?: number;
+  onStrokeDataLoaded?: (strokeData: string[]) => void;
 }
 
 const KanjiReference: React.FC<KanjiReferenceProps> = ({
@@ -19,39 +15,16 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
   size = 200,
   showAnimation = false,
   animationSpeed = 1,
+  onStrokeDataLoaded,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const writerRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const [isLoaded, setIsLoaded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-
-  // Load HanziWriter script dynamically
-  useEffect(() => {
-    if (typeof window.HanziWriter !== 'undefined') {
-      setIsLoaded(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/hanzi-writer@3.7.2/dist/hanzi-writer.min.js';
-    script.onload = () => {
-      setIsLoaded(true);
-    };
-    script.onerror = () => {
-      console.error('Failed to load HanziWriter');
-    };
-    document.head.appendChild(script);
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
-    };
-  }, []);
+  const { isLoaded, HanziWriter } = useHanziWriter();
 
   // Initialize HanziWriter when loaded
   useEffect(() => {
-    if (!isLoaded || !containerRef.current || !window.HanziWriter) {
+    if (!isLoaded || !containerRef.current || !HanziWriter) {
       return;
     }
 
@@ -61,7 +34,7 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
     }
 
     try {
-      writerRef.current = window.HanziWriter.create(containerRef.current, kanji.character, {
+      writerRef.current = HanziWriter.create(containerRef.current, kanji.character, {
         width: size,
         height: size,
         padding: 20,
@@ -73,6 +46,16 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
         radicalColor: '#dc2626',
         outlineColor: '#9ca3af',
         drawingColor: '#059669',
+        onLoadCharDataSuccess: (charData: any) => {
+          // Extract stroke data and pass it to the parent component for validation
+          if (onStrokeDataLoaded && charData && charData.strokes) {
+            console.info(`✓ KanjiReference loaded stroke data for ${kanji.character} (${charData.strokes.length} strokes)`);
+            onStrokeDataLoaded(charData.strokes);
+          }
+        },
+        onLoadCharDataError: (error: any) => {
+          console.warn(`⚠ KanjiReference failed to load stroke data for ${kanji.character}:`, error);
+        }
       });
     } catch (error) {
       console.error('Error creating HanziWriter:', error);
@@ -85,7 +68,7 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
         `;
       }
     }
-  }, [isLoaded, kanji.character, size, animationSpeed]);
+  }, [isLoaded, HanziWriter, kanji.character, size, animationSpeed]);
 
   const animateStrokes = useCallback(() => {
     if (writerRef.current && !isAnimating) {
@@ -101,13 +84,13 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
 
   // Auto-animate if requested
   useEffect(() => {
-    if (showAnimation && isLoaded && writerRef.current && !isAnimating) {
+    if (showAnimation && isLoaded && HanziWriter && writerRef.current && !isAnimating) {
       const timer = setTimeout(() => {
         animateStrokes();
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [showAnimation, isLoaded, isAnimating, animateStrokes]);
+  }, [showAnimation, isLoaded, HanziWriter, isAnimating, animateStrokes]);
 
   return (
     <div className="flex flex-col items-center space-y-4">
@@ -117,7 +100,7 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
         style={{ width: size, height: size }}
       />
       
-      {isLoaded && writerRef.current && (
+      {isLoaded && HanziWriter && writerRef.current && (
         <div className="flex gap-2">
           <button
             onClick={animateStrokes}

@@ -45,7 +45,8 @@
       "mcp__chrome__chrome_navigate",
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(git commit:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "WebFetch(domain:hanziwriter.org)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

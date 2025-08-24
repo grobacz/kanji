@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '../../store/appStore';
 import { useKanjiByLevel } from '../../hooks/useKanjiData';
 import { Link } from 'react-router-dom';
@@ -6,11 +6,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DrawingCanvas from './DrawingCanvas';
 import KanjiReference from './KanjiReference';
 import ZenMode from './ZenMode';
-import { validateKanjiDrawing } from '../../utils/strokeValidation';
+import { validateKanjiDrawingWithStrokeData } from '../../utils/strokeValidation';
 import type { StrokeData, ValidationResult } from '../../types/strokeValidation';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { useFeedback } from '../../hooks/useFeedback';
+import { useHanziWriter } from '../../hooks/useHanziWriter';
 import toast from 'react-hot-toast';
 
 interface DrawingCanvasRef {
@@ -30,8 +31,10 @@ const WritingPractice: React.FC = () => {
   const [showReference, setShowReference] = useState(false);
   const [sessionStats, setSessionStats] = useState({ attempts: 0, goodAttempts: 0 });
   const [zenMode, setZenMode] = useState(false);
+  const [strokeData, setStrokeData] = useState<string[] | null>(null);
   const canvasRef = useRef<DrawingCanvasRef>(null);
   const feedback = useFeedback();
+  const { isLoaded: isHanziWriterLoaded, HanziWriter } = useHanziWriter();
 
   const currentKanji = kanjiData?.[currentKanjiIndex];
 
@@ -40,8 +43,36 @@ const WritingPractice: React.FC = () => {
     setStrokes([]);
     setValidationResult(null);
     setShowReference(false);
+    setStrokeData(null); // Reset stroke data when kanji changes
     canvasRef.current?.clear(); // Clear canvas when kanji changes
   }, [currentKanjiIndex]);
+
+  const handleStrokeDataLoaded = useCallback((strokes: string[]) => {
+    setStrokeData(strokes);
+  }, []);
+
+  // Load stroke data immediately when kanji changes (for validation)
+  useEffect(() => {
+    if (!currentKanji) return;
+
+    // Wait for HanziWriter to be loaded
+    if (!isHanziWriterLoaded || !HanziWriter) {
+      console.info(`⏳ Waiting for HanziWriter to load before loading stroke data for ${currentKanji.character}`);
+      return;
+    }
+
+    // Load stroke data for validation
+    HanziWriter.loadCharacterData(currentKanji.character)
+      .then((charData: any) => {
+        if (charData && charData.strokes) {
+          console.info(`✓ Pre-loaded stroke data for validation: ${currentKanji.character} (${charData.strokes.length} strokes)`);
+          setStrokeData(charData.strokes);
+        }
+      })
+      .catch((error: any) => {
+        console.warn(`⚠ Failed to pre-load stroke data for ${currentKanji.character}:`, error);
+      });
+  }, [currentKanji, isHanziWriterLoaded, HanziWriter]);
 
   const handleStrokeComplete = (strokePoints: number[][]) => {
     if (!strokePoints.length) return;
@@ -76,8 +107,8 @@ const WritingPractice: React.FC = () => {
     // Simulate processing time for better UX
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    // Use the real validation system
-    const result = validateKanjiDrawing(currentKanji, strokes, 400, 400);
+    // Use the real validation system with shared stroke data from KanjiReference
+    const result = validateKanjiDrawingWithStrokeData(currentKanji, strokes, strokeData, 400, 400);
     
     setValidationResult(result);
     setIsValidating(false);
@@ -135,11 +166,13 @@ const WritingPractice: React.FC = () => {
     );
   }
 
-  if (isLoading) {
+  if (isLoading || !isHanziWriterLoaded) {
     return (
       <div className="w-full max-w-4xl mx-auto text-center">
         <LoadingSpinner />
-        <p className="text-gray-600 mt-4">Loading kanji data...</p>
+        <p className="text-gray-600 mt-4">
+          {isLoading ? 'Loading kanji data...' : 'Loading stroke validation system...'}
+        </p>
       </div>
     );
   }
@@ -302,7 +335,11 @@ const WritingPractice: React.FC = () => {
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                 >
-                  <KanjiReference kanji={currentKanji} size={180} />
+                  <KanjiReference 
+                    kanji={currentKanji} 
+                    size={180}
+                    onStrokeDataLoaded={handleStrokeDataLoaded}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -393,13 +430,35 @@ const WritingPractice: React.FC = () => {
                       <div
                         key={index}
                         className={`text-sm p-2 rounded ${
-                          item.startsWith('✓') ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'
+                          item.startsWith('✓') ? 'bg-green-50 text-green-700' : 
+                          item.includes('Wrong') || item.includes('Missing') || item.includes('Extra') ? 'bg-red-50 text-red-700' :
+                          item.includes('Close') ? 'bg-yellow-50 text-yellow-700' :
+                          'bg-blue-50 text-blue-700'
                         }`}
                       >
                         {item}
                       </div>
                     ))}
                   </div>
+
+                  {/* Individual stroke details if available */}
+                  {validationResult.strokeMatches && validationResult.strokeMatches.length > 0 && (
+                    <div className="mt-4">
+                      <h5 className="text-sm font-semibold text-gray-700 mb-2">Stroke Details:</h5>
+                      <div className="space-y-1">
+                        {validationResult.strokeMatches.map((match, index) => (
+                          <div
+                            key={index}
+                            className={`text-xs p-1.5 rounded ${
+                              match.isCorrect ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+                            }`}
+                          >
+                            {match.feedback} ({Math.round(match.similarity * 100)}% match)
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Details */}
                   <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
