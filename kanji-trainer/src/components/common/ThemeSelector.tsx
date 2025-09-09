@@ -20,11 +20,18 @@ const ThemeSelector: React.FC = () => {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="p-3 glass-card hover:shadow-glow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-400 rounded-xl group"
+        className="flex items-center justify-center rounded-xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus-ring"
+        style={{ 
+          width: '48px', 
+          height: '48px', 
+          minWidth: '48px', 
+          minHeight: '48px',
+          background: 'var(--gradient-primary)'
+        }}
         aria-label="Change theme"
         title="Change theme"
       >
-        <SwatchIcon className="w-5 h-5 text-slate-700 dark:text-slate-300 group-hover:scale-110 transition-transform duration-200" />
+        <SwatchIcon style={{ width: '24px', height: '24px' }} />
       </button>
 
       {/* Theme Options */}

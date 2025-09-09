@@ -4,7 +4,6 @@ import { Toaster } from 'react-hot-toast';
 import { Suspense, lazy, useEffect } from 'react';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import Header from './components/common/Header';
-import Navigation from './components/common/Navigation';
 import FocusExitButton from './components/common/FocusExitButton';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -106,7 +105,6 @@ function App() {
                 } />
               </Routes>
             </main>
-            <Navigation />
             <FocusExitButton />
           </div>
           <Toaster

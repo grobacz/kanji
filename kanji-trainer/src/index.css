@@ -420,6 +420,11 @@
     animation: fadeIn 0.3s ease-out;
   }
 
+  /* Scale-in animation for active indicators */
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
   /* Floating animation for background elements */
   .animate-float {
     animation: float 6s ease-in-out infinite;
@@ -474,6 +479,17 @@
     }
     100% {
       background-position: -200% 0;
+    }
+  }
+
+  @keyframes scaleIn {
+    0% {
+      transform: translateX(-50%) scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: translateX(-50%) scale(1);
+      opacity: 1;
     }
   }
 }
