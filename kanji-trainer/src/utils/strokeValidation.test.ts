@@ -36,12 +36,12 @@ const createMockStroke = (points: number[][], duration = 1000): StrokeData => ({
 });
 
 describe('StrokeValidator', () => {
-  describe('validateStrokes', () => {
+  describe('validateStrokesWithData', () => {
     it('should validate correct stroke count', () => {
       const validator = new StrokeValidator(mockKanji);
       const strokes = [createMockStroke([[0, 0], [100, 0]])]; // One horizontal stroke
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.strokeCount.correct).toBe(true);
       expect(result.strokeCount.expected).toBe(1);
@@ -55,7 +55,7 @@ describe('StrokeValidator', () => {
         createMockStroke([[0, 50], [100, 50]]),
       ]; // Two strokes for a one-stroke kanji
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.strokeCount.correct).toBe(false);
       expect(result.strokeCount.expected).toBe(1);
@@ -66,7 +66,7 @@ describe('StrokeValidator', () => {
       const validator = new StrokeValidator(mockKanji);
       const strokes = [createMockStroke([[0, 0], [100, 0]], 500)]; // 500ms stroke
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.timing.reasonable).toBe(true);
       expect(result.timing.totalTime).toBe(500);
@@ -77,7 +77,7 @@ describe('StrokeValidator', () => {
       const validator = new StrokeValidator(mockKanji);
       const strokes = [createMockStroke([[0, 0], [100, 0]], 50)]; // 50ms stroke (too fast)
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.timing.reasonable).toBe(false);
     });
@@ -86,7 +86,7 @@ describe('StrokeValidator', () => {
       const validator = new StrokeValidator(mockKanji);
       const strokes = [createMockStroke([[0, 0], [100, 0]], 6000)]; // 6s stroke (too slow)
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.timing.reasonable).toBe(false);
     });
@@ -97,7 +97,7 @@ describe('StrokeValidator', () => {
         createMockStroke([[100, 100], [250, 250]]) // Diagonal stroke covering reasonable area for simple kanji
       ];
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.coverage.adequate).toBe(true);
       expect(result.coverage.percentage).toBeGreaterThan(8); // Updated minimum for simple kanji
@@ -109,7 +109,7 @@ describe('StrokeValidator', () => {
         createMockStroke([[190, 190], [210, 210]]) // Very small stroke in center
       ];
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.coverage.adequate).toBe(false);
       expect(result.coverage.percentage).toBeLessThan(5);
@@ -119,7 +119,7 @@ describe('StrokeValidator', () => {
       const validator = new StrokeValidator(mockKanji);
       const strokes = [createMockStroke([[50, 200], [350, 200]], 800)]; // Perfect horizontal stroke
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.feedback.some(f => f.includes('✓'))).toBe(true);
       expect(result.score).toBeGreaterThanOrEqual(70);
@@ -130,7 +130,7 @@ describe('StrokeValidator', () => {
       const validator = new StrokeValidator(complexKanji);
       const strokes = [createMockStroke([[200, 200], [201, 201]], 50)]; // Tiny, fast stroke
       
-      const result = validator.validateStrokes(strokes);
+      const result = validator.validateStrokesWithData(strokes, null);
       
       expect(result.feedback.length).toBeGreaterThan(0);
       expect(result.score).toBeLessThan(50);
@@ -140,7 +140,7 @@ describe('StrokeValidator', () => {
 
     it('should handle empty strokes', () => {
       const validator = new StrokeValidator(mockKanji);
-      const result = validator.validateStrokes([]);
+      const result = validator.validateStrokesWithData([], null);
       
       expect(result.strokeCount.actual).toBe(0);
       expect(result.timing.reasonable).toBe(false);
@@ -154,7 +154,7 @@ describe('StrokeValidator', () => {
       
       // Perfect attempt
       const perfectStrokes = [createMockStroke([[50, 200], [350, 200]], 800)];
-      const perfectResult = validator.validateStrokes(perfectStrokes);
+      const perfectResult = validator.validateStrokesWithData(perfectStrokes, null);
       expect(perfectResult.score).toBeGreaterThanOrEqual(70);
       
       // Poor attempt - multiple very tiny strokes, wrong count, bad timing, poor coverage
@@ -165,7 +165,7 @@ describe('StrokeValidator', () => {
         createMockStroke([[202, 201], [203, 202]], 30), // 1px diagonal, too fast
         createMockStroke([[203, 202], [204, 203]], 30), // 1px diagonal, too fast (5 strokes for 1-stroke kanji)
       ];
-      const poorResult = validator.validateStrokes(poorStrokes);
+      const poorResult = validator.validateStrokesWithData(poorStrokes, null);
       expect(poorResult.score).toBeLessThan(30); // Very poor attempt should score very low
     });
   });
@@ -177,8 +177,8 @@ describe('StrokeValidator', () => {
       const topToBottomStroke = [createMockStroke([[200, 50], [200, 350]])];
       const bottomToTopStroke = [createMockStroke([[200, 350], [200, 50]])];
       
-      const topToBottomResult = validator.validateStrokes(topToBottomStroke);
-      const bottomToTopResult = validator.validateStrokes(bottomToTopStroke);
+      const topToBottomResult = validator.validateStrokesWithData(topToBottomStroke, null);
+      const bottomToTopResult = validator.validateStrokesWithData(bottomToTopStroke, null);
       
       expect(topToBottomResult.score).toBeGreaterThanOrEqual(bottomToTopResult.score);
     });
@@ -187,7 +187,7 @@ describe('StrokeValidator', () => {
       const validator = new StrokeValidator(mockKanji);
       const anyDirectionStroke = [createMockStroke([[350, 200], [50, 200]])]; // Right to left
       
-      const result = validator.validateStrokes(anyDirectionStroke);
+      const result = validator.validateStrokesWithData(anyDirectionStroke, null);
       
       expect(result.score).toBeGreaterThan(0); // Should still get some credit
     });
@@ -195,10 +195,10 @@ describe('StrokeValidator', () => {
 });
 
 describe('validateKanjiDrawing utility function', () => {
-  it('should work as a convenient wrapper', () => {
+  it('should work as a convenient wrapper', async () => {
     const strokes = [createMockStroke([[50, 200], [350, 200]], 800)];
     
-    const result = validateKanjiDrawing(mockKanji, strokes, 400, 400);
+    const result = await validateKanjiDrawing(mockKanji, strokes, 400, 400);
     
     expect(result).toBeDefined();
     expect(result.score).toBeGreaterThan(0);

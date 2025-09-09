@@ -3,7 +3,9 @@ import type { StrokeData, ValidationResult, StrokeMatch } from '../types/strokeV
 
 declare global {
   interface Window {
-    HanziWriter: any;
+    HanziWriter: {
+      loadCharacterData: (character: string) => Promise<HanziWriterCharData>;
+    };
   }
 }
 
@@ -73,7 +75,7 @@ export class StrokeValidator {
         .then((charData: HanziWriterCharData) => {
           resolve(charData);
         })
-        .catch((error: any) => {
+        .catch((error: unknown) => {
           console.warn(`Failed to load character data for ${this.kanji.character}:`, error);
           resolve(null);
         });
@@ -127,13 +129,20 @@ export class StrokeValidator {
     
     if (userStroke.points.length < 2) return 0;
 
-    // Parse SVG path to get key points (simplified approach)
-    const pathPoints = this.extractKeyPointsFromSVGPath(expectedPath);
-    if (pathPoints.length < 2) return 0.5; // Give some credit for effort
-
     // Compare start and end points (scaled to our canvas)
     const userStart = userStroke.points[0];
     const userEnd = userStroke.points[userStroke.points.length - 1];
+
+    // Parse SVG path to get key points (simplified approach)
+    const pathPoints = this.extractKeyPointsFromSVGPath(expectedPath);
+    if (pathPoints.length < 2) {
+      console.warn(`Failed to extract enough points from path: "${expectedPath}". Got ${pathPoints.length} points.`);
+      // Instead of returning 0.5, fall back to generic stroke direction validation
+      const userDirection = [userEnd[0] - userStart[0], userEnd[1] - userStart[1]];
+      const genericDirectionScore = this.evaluateGenericStrokeDirection(userDirection);
+      console.debug(`Using generic direction validation: ${Math.round(genericDirectionScore * 100)}%`);
+      return genericDirectionScore;
+    }
     
     const expectedStart = this.scalePointToCanvas(pathPoints[0]);
     const expectedEnd = this.scalePointToCanvas(pathPoints[pathPoints.length - 1]);
@@ -142,10 +151,12 @@ export class StrokeValidator {
     const startDistance = this.calculateDistance(userStart, expectedStart);
     const endDistance = this.calculateDistance(userEnd, expectedEnd);
     
+    // More reasonable distance tolerance - use 20% of canvas diagonal instead of 30%
     const maxCanvasDistance = Math.sqrt(this.canvasWidth * this.canvasWidth + this.canvasHeight * this.canvasHeight);
+    const toleranceDistance = maxCanvasDistance * 0.2; // More forgiving tolerance
     
-    const startSimilarity = Math.max(0, 1 - (startDistance / (maxCanvasDistance * 0.3)));
-    const endSimilarity = Math.max(0, 1 - (endDistance / (maxCanvasDistance * 0.3)));
+    const startSimilarity = Math.max(0, 1 - (startDistance / toleranceDistance));
+    const endSimilarity = Math.max(0, 1 - (endDistance / toleranceDistance));
     
     // Simple direction comparison
     const userDirection = [userEnd[0] - userStart[0], userEnd[1] - userStart[1]];
@@ -153,23 +164,64 @@ export class StrokeValidator {
     
     const directionSimilarity = this.calculateDirectionSimilarity(userDirection, expectedDirection);
 
-    // Combined score: 40% start, 40% end, 20% direction
-    return (startSimilarity * 0.4) + (endSimilarity * 0.4) + (directionSimilarity * 0.2);
+    // Combined score: 25% start, 25% end, 50% direction (direction is most important for kanji)
+    const finalSimilarity = (startSimilarity * 0.25) + (endSimilarity * 0.25) + (directionSimilarity * 0.5);
+    
+    // Debug logging for development
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`Stroke similarity: start=${Math.round(startSimilarity*100)}%, end=${Math.round(endSimilarity*100)}%, direction=${Math.round(directionSimilarity*100)}%, final=${Math.round(finalSimilarity*100)}%`);
+    }
+    
+    return finalSimilarity;
   }
 
   private extractKeyPointsFromSVGPath(pathString: string): number[][] {
-    // Very simplified SVG path parsing - just extract move and line commands
+    // Enhanced SVG path parsing to handle various HanziWriter formats
     // HanziWriter paths are in 1024x1024 coordinate system
     const points: number[][] = [];
-    const commands = pathString.match(/[MLZ][^MLZ]*/g) || [];
+    
+    if (!pathString || typeof pathString !== 'string') {
+      console.warn('Invalid path string provided to extractKeyPointsFromSVGPath');
+      return points;
+    }
+    
+    // Match various SVG path commands including curves (C, Q) for better parsing
+    const commands = pathString.match(/[MLHVCSQTAZ][^MLHVCSQTAZ]*/gi) || [];
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`Parsing SVG path: "${pathString}"`);
+      console.debug(`Found ${commands.length} path commands:`, commands);
+    }
     
     for (const command of commands) {
-      const type = command[0];
+      const type = command[0].toUpperCase();
       const coords = command.slice(1).trim().split(/[\s,]+/).map(Number).filter(n => !isNaN(n));
       
       if ((type === 'M' || type === 'L') && coords.length >= 2) {
         points.push([coords[0], coords[1]]);
+      } else if (type === 'C' && coords.length >= 6) {
+        // Cubic Bézier curve - take the end point
+        points.push([coords[4], coords[5]]);
+      } else if (type === 'Q' && coords.length >= 4) {
+        // Quadratic Bézier curve - take the end point
+        points.push([coords[2], coords[3]]);
+      } else if (type === 'H' && coords.length >= 1) {
+        // Horizontal line - need previous point for Y coordinate
+        if (points.length > 0) {
+          const prevY = points[points.length - 1][1];
+          points.push([coords[0], prevY]);
+        }
+      } else if (type === 'V' && coords.length >= 1) {
+        // Vertical line - need previous point for X coordinate  
+        if (points.length > 0) {
+          const prevX = points[points.length - 1][0];
+          points.push([prevX, coords[0]]);
+        }
       }
+    }
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.debug(`Extracted ${points.length} points:`, points);
     }
     
     return points;
@@ -177,6 +229,7 @@ export class StrokeValidator {
 
   private scalePointToCanvas(point: number[]): number[] {
     // Scale from HanziWriter's 1024x1024 coordinate system to our canvas
+    // HanziWriter uses a coordinate system where 0,0 is top-left and 1024,1024 is bottom-right
     const scaleFactor = Math.min(this.canvasWidth, this.canvasHeight) / 1024;
     const offsetX = (this.canvasWidth - 1024 * scaleFactor) / 2;
     const offsetY = (this.canvasHeight - 1024 * scaleFactor) / 2;
@@ -191,6 +244,38 @@ export class StrokeValidator {
     const dx = point1[0] - point2[0];
     const dy = point1[1] - point2[1];
     return Math.sqrt(dx * dx + dy * dy);
+  }
+
+  private evaluateGenericStrokeDirection(userDirection: number[]): number {
+    // Evaluate stroke direction based on general kanji writing principles
+    const [deltaX, deltaY] = userDirection;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    if (distance < 10) return 0.3; // Very short strokes get some credit
+    
+    // Good directions for kanji strokes:
+    // 1. Downward (positive Y)
+    // 2. Rightward (positive X)
+    // 3. Horizontal right (deltaX > 0, small deltaY)
+    // 4. Vertical down (deltaY > 0, small deltaX)
+    
+    const isDownward = deltaY > Math.abs(deltaX) * 0.3; // More down than diagonal
+    const isRightward = deltaX > Math.abs(deltaY) * 0.3; // More right than diagonal
+    const isHorizontalRight = Math.abs(deltaX) > Math.abs(deltaY) * 2 && deltaX > 0;
+    const isVerticalDown = Math.abs(deltaY) > Math.abs(deltaX) * 2 && deltaY > 0;
+    
+    if (isVerticalDown) return 0.9; // Vertical down strokes are very common
+    if (isHorizontalRight) return 0.85; // Horizontal right strokes are common
+    if (isDownward) return 0.75; // General downward motion
+    if (isRightward) return 0.7; // General rightward motion
+    
+    // Diagonal down-right is also acceptable
+    if (deltaX > 0 && deltaY > 0) return 0.6;
+    
+    // Other directions get less credit
+    if (deltaX > 0 || deltaY > 0) return 0.4; // At least some correct component
+    
+    return 0.2; // Wrong direction (up or left)
   }
 
   private calculateDirectionSimilarity(dir1: number[], dir2: number[]): number {
@@ -211,13 +296,15 @@ export class StrokeValidator {
   }
 
   private generateStrokeFeedback(strokeNum: number, similarity: number, isCorrect: boolean): string {
+    const percentage = Math.round(similarity * 100);
+    
     if (isCorrect) {
-      if (similarity >= 0.8) return `✓ Stroke ${strokeNum}: Excellent!`;
-      else return `✓ Stroke ${strokeNum}: Good direction`;
+      if (similarity >= 0.8) return `✓ Stroke ${strokeNum}: Excellent! (${percentage}% match)`;
+      else return `✓ Stroke ${strokeNum}: Good direction (${percentage}% match)`;
     } else {
-      if (similarity >= 0.4) return `Stroke ${strokeNum}: Close, but check the direction`;
-      else if (similarity >= 0.2) return `Stroke ${strokeNum}: Wrong direction or position`;
-      else return `Stroke ${strokeNum}: Doesn't match expected stroke`;
+      if (similarity >= 0.4) return `Stroke ${strokeNum}: Close, but check the direction (${percentage}% match)`;
+      else if (similarity >= 0.2) return `Stroke ${strokeNum}: Wrong direction or position (${percentage}% match)`;
+      else return `Stroke ${strokeNum}: Doesn't match expected stroke (${percentage}% match)`;
     }
   }
 

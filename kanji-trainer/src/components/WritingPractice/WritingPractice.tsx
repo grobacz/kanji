@@ -453,7 +453,7 @@ const WritingPractice: React.FC = () => {
                               match.isCorrect ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
                             }`}
                           >
-                            {match.feedback} ({Math.round(match.similarity * 100)}% match)
+                            {match.feedback}
                           </div>
                         ))}
                       </div>
