@@ -80,21 +80,19 @@ const Header: React.FC = () => {
             <ThemeSelector />
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="flex items-center justify-center rounded-xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus-ring"
+              className="flex items-center justify-center w-12 h-12 rounded-xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 focus-ring"
               style={{ 
-                width: '48px', 
-                height: '48px', 
                 minWidth: '48px', 
                 minHeight: '48px',
-                background: 'var(--gradient-primary)'
+                background: 'var(--gradient-primary)' 
               }}
               aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMenuOpen}
             >
               {isMenuOpen ? (
-                <XMarkIcon style={{ width: '24px', height: '24px' }} />
+                <XMarkIcon className="w-6 h-6" />
               ) : (
-                <Bars3Icon style={{ width: '24px', height: '24px' }} />
+                <Bars3Icon className="w-6 h-6" />
               )}
             </button>
           </div>

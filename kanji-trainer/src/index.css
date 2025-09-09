@@ -94,7 +94,7 @@
   }
   
   /* Allow Tailwind width/height classes to override max-width/max-height */
-  svg[class*="w-"] {
+  svg[class*="w-"], svg[style*="width"] {
     max-width: none;
     max-height: none;
   }
