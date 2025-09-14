@@ -2,9 +2,29 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { vi } from 'vitest';
 import DrawingCanvas from './DrawingCanvas';
 
+interface MockStageProps {
+  children: React.ReactNode;
+  onMouseDown?: () => void;
+  onMousemove?: () => void;
+  onMouseup?: () => void;
+  onTouchStart?: () => void;
+  onTouchMove?: () => void;
+  onTouchEnd?: () => void;
+  [key: string]: unknown;
+}
+
+interface MockLayerProps {
+  children: React.ReactNode;
+}
+
+interface MockLineProps {
+  points?: number[];
+  stroke?: string;
+}
+
 // Mock Konva components
 vi.mock('react-konva', () => ({
-  Stage: ({ children, onMouseDown, onMousemove, onMouseup, onTouchStart, onTouchMove, onTouchEnd, ...props }: any) => (
+  Stage: ({ children, onMouseDown, onMousemove, onMouseup, onTouchStart, onTouchMove, onTouchEnd, ...props }: MockStageProps) => (
     <div 
       data-testid="drawing-stage" 
       {...props}
@@ -18,8 +38,8 @@ vi.mock('react-konva', () => ({
       {children}
     </div>
   ),
-  Layer: ({ children }: any) => <div data-testid="drawing-layer">{children}</div>,
-  Line: ({ points, stroke }: any) => (
+  Layer: ({ children }: MockLayerProps) => <div data-testid="drawing-layer">{children}</div>,
+  Line: ({ points, stroke }: MockLineProps) => (
     <div data-testid="stroke-line" data-stroke={stroke} data-points={points?.join(',')}>
       Line
     </div>
@@ -158,7 +178,7 @@ describe('DrawingCanvas', () => {
     
     // The component should expose a clear function to window
     // (This is a simplified test - in reality we'd test the actual clearing functionality)
-    expect(typeof (window as any).clearDrawingCanvas).toBe('function');
+    expect(typeof (window as unknown as { clearDrawingCanvas: () => void }).clearDrawingCanvas).toBe('function');
   });
 
   it('handles different canvas sizes', () => {

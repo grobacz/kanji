@@ -46,7 +46,8 @@
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(git commit:*)",
       "Bash(git add:*)",
-      "WebFetch(domain:hanziwriter.org)"
+      "WebFetch(domain:hanziwriter.org)",
+      "WebFetch(domain:mui.com)"
     ],
     "deny": [],
     "defaultMode": "acceptEdits"

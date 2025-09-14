@@ -2,6 +2,15 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import type { Kanji } from '../../types';
 import { useHanziWriter } from '../../hooks/useHanziWriter';
 
+interface HanziWriterCharData {
+  character: string;
+  strokes: string[];
+}
+
+interface HanziWriterInstance {
+  animateCharacter: (options: { onComplete: () => void }) => void;
+}
+
 interface KanjiReferenceProps {
   kanji: Kanji;
   size?: number;
@@ -18,7 +27,7 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
   onStrokeDataLoaded,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const writerRef = useRef<any>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const writerRef = useRef<HanziWriterInstance | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const { isLoaded, HanziWriter } = useHanziWriter();
 
@@ -46,14 +55,14 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
         radicalColor: '#dc2626',
         outlineColor: '#9ca3af',
         drawingColor: '#059669',
-        onLoadCharDataSuccess: (charData: any) => {
+        onLoadCharDataSuccess: (charData: HanziWriterCharData) => {
           // Extract stroke data and pass it to the parent component for validation
           if (onStrokeDataLoaded && charData && charData.strokes) {
             console.info(`✓ KanjiReference loaded stroke data for ${kanji.character} (${charData.strokes.length} strokes)`);
             onStrokeDataLoaded(charData.strokes);
           }
         },
-        onLoadCharDataError: (error: any) => {
+        onLoadCharDataError: (error: Error) => {
           console.warn(`⚠ KanjiReference failed to load stroke data for ${kanji.character}:`, error);
         }
       });
@@ -68,7 +77,7 @@ const KanjiReference: React.FC<KanjiReferenceProps> = ({
         `;
       }
     }
-  }, [isLoaded, HanziWriter, kanji.character, size, animationSpeed]);
+  }, [isLoaded, HanziWriter, kanji.character, size, animationSpeed, onStrokeDataLoaded]);
 
   const animateStrokes = useCallback(() => {
     if (writerRef.current && !isAnimating) {

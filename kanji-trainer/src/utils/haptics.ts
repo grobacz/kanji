@@ -21,7 +21,7 @@ export const triggerHapticFeedback = (type: HapticType = 'light'): void => {
   try {
     // Modern haptic feedback API (iOS Safari, some Android browsers)
     if ('hapticFeedback' in navigator) {
-      // @ts-ignore - This is a newer API not in all TypeScript definitions yet
+      // @ts-expect-error - This is a newer API not in all TypeScript definitions yet
       navigator.hapticFeedback?.impact?.(type);
       return;
     }

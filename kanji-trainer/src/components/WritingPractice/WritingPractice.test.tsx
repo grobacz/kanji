@@ -16,13 +16,23 @@ vi.mock('../../hooks/useKanjiData', () => ({
   useKanjiByLevel: (level: unknown) => mockUseKanjiByLevel(level),
 }));
 
+interface MockDrawingCanvasProps {
+  onStrokeComplete?: (stroke: number[][]) => void;
+  onClear?: () => void;
+  disabled?: boolean;
+}
+
+interface MockKanjiReferenceProps {
+  kanji: { character: string };
+}
+
 // Mock DrawingCanvas
 vi.mock('./DrawingCanvas', () => ({
-  default: ({ onStrokeComplete, onClear, disabled }: any) => (
+  default: ({ onStrokeComplete, onClear, disabled }: MockDrawingCanvasProps) => (
     <div data-testid="drawing-canvas">
       <button 
         data-testid="mock-stroke"
-        onClick={() => onStrokeComplete([[0, 0], [100, 100]])}
+        onClick={() => onStrokeComplete?.([[0, 0], [100, 100]])}
         disabled={disabled}
       >
         Add Stroke
@@ -36,7 +46,7 @@ vi.mock('./DrawingCanvas', () => ({
 
 // Mock KanjiReference
 vi.mock('./KanjiReference', () => ({
-  default: ({ kanji }: any) => (
+  default: ({ kanji }: MockKanjiReferenceProps) => (
     <div data-testid="kanji-reference">
       Reference for {kanji.character}
     </div>
@@ -55,12 +65,21 @@ vi.mock('../../utils/strokeValidation', () => ({
   })),
 }));
 
+interface MockMotionDivProps {
+  children: React.ReactNode;
+  [key: string]: unknown;
+}
+
+interface MockAnimatePresenceProps {
+  children: React.ReactNode;
+}
+
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    div: ({ children, ...props }: MockMotionDivProps) => <div {...props}>{children}</div>,
   },
-  AnimatePresence: ({ children }: any) => children,
+  AnimatePresence: ({ children }: MockAnimatePresenceProps) => children,
 }));
 
 // Mock toast

@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useFocusMode } from '../../hooks/useFocusMode';
 import ThemeSelector from './ThemeSelector';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Bars3Icon,
   XMarkIcon,
@@ -38,6 +38,42 @@ const Header: React.FC = () => {
       emoji: '🃏'
     }
   ];
+
+  // Body scroll lock effect for drawer
+  useEffect(() => {
+    if (isMenuOpen) {
+      // Prevent body scroll when drawer is open
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${window.innerWidth - document.documentElement.clientWidth}px`;
+    } else {
+      // Restore body scroll when drawer is closed
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isMenuOpen]);
+
+  // Keyboard accessibility - close drawer with ESC key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMenuOpen]);
 
   return (
     <AnimatePresence>
@@ -120,34 +156,51 @@ const Header: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
               onClick={() => setIsMenuOpen(false)}
+              style={{ touchAction: 'none' }}
             />
             
-            {/* Menu sidebar */}
+            {/* Navigation Drawer */}
             <motion.div
-              initial={{ x: '100%' }}
+              initial={{ x: '-100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 20, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-72 bg-white backdrop-blur-xl border-l border-gray-200 shadow-2xl z-50"
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed top-0 left-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl z-50 overflow-hidden"
+              style={{
+                boxShadow: '4px 0 20px rgba(0, 0, 0, 0.15)',
+                maxHeight: '100vh',
+                maxHeight: '100dvh' // Use dynamic viewport height for mobile
+              }}
             >
-              <div className="flex flex-col h-full">
-                {/* Menu header */}
-                <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                  <h2 className="text-lg font-semibold text-gray-900">Navigation</h2>
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-8 text-white">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-2xl">🇯🇵</span>
+                  </div>
                   <button
                     onClick={() => setIsMenuOpen(false)}
-                    className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
                     aria-label="Close menu"
                   >
-                    <XMarkIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                    <XMarkIcon className="w-6 h-6" />
                   </button>
                 </div>
-                
-                {/* Navigation items */}
-                <nav className="flex-1 p-6">
-                  <ul className="space-y-3">
+                <h2 className="text-xl font-semibold mb-1">Kanji Trainer</h2>
+                <p className="text-white/80 text-sm">Learn Japanese Characters</p>
+                {selectedLevel && (
+                  <div className="mt-3 inline-flex items-center px-3 py-1 bg-white/20 rounded-full text-sm font-medium">
+                    Current Level: {selectedLevel}
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation List */}
+              <div className="flex-1 py-4">
+                <nav>
+                  <ul className="space-y-1 px-4">
                     {navItems.map((item) => {
                       const isActive = location.pathname === item.path;
                       const Icon = item.icon;
@@ -157,19 +210,27 @@ const Header: React.FC = () => {
                           <Link
                             to={item.path}
                             onClick={() => setIsMenuOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-base ${
+                            className={`flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-200 group ${
                               isActive
-                                ? 'bg-blue-500 text-white shadow-md'
-                                : 'hover:bg-gray-100 text-gray-900 hover:text-gray-900'
+                                ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600'
+                                : 'hover:bg-gray-50 text-gray-700 hover:text-gray-900'
                             }`}
                           >
-                            <div className="flex-shrink-0 relative" style={{width: '20px', height: '20px'}}>
-                              <Icon style={{width: '20px', height: '20px'}} strokeWidth={2} />
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                              isActive 
+                                ? 'bg-blue-100 text-blue-600' 
+                                : 'bg-gray-100 text-gray-600 group-hover:bg-blue-50 group-hover:text-blue-600'
+                            }`}>
+                              <Icon className="w-5 h-5" strokeWidth={2} />
                             </div>
-                            <span className="font-medium">{item.label}</span>
-                            <span className="ml-1 text-sm">{item.emoji}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-base truncate">{item.label}</span>
+                                <span className="text-lg flex-shrink-0">{item.emoji}</span>
+                              </div>
+                            </div>
                             {isActive && (
-                              <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                             )}
                           </Link>
                         </li>
@@ -177,20 +238,13 @@ const Header: React.FC = () => {
                     })}
                   </ul>
                 </nav>
-                
-                {/* Footer info */}
-                <div className="p-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-gray-50/50 dark:bg-slate-800/50">
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-3 text-sm text-gray-600 dark:text-gray-400">
-                      <span>🇯🇵</span>
-                      <span className="font-medium">Kanji Learning</span>
-                    </div>
-                    {selectedLevel && (
-                      <div className="inline-flex items-center px-3 py-1.5 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 rounded-full text-xs font-medium shadow-sm">
-                        Level {selectedLevel}
-                      </div>
-                    )}
-                  </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-gray-100">
+                <div className="text-center text-sm text-gray-500">
+                  <div className="font-medium">Japanese Kanji Learning</div>
+                  <div className="text-xs mt-1">Master JLPT Characters</div>
                 </div>
               </div>
             </motion.div>

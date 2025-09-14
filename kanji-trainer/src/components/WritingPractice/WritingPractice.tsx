@@ -63,13 +63,13 @@ const WritingPractice: React.FC = () => {
 
     // Load stroke data for validation
     HanziWriter.loadCharacterData(currentKanji.character)
-      .then((charData: any) => {
+      .then((charData: { strokes?: string[] }) => {
         if (charData && charData.strokes) {
           console.info(`✓ Pre-loaded stroke data for validation: ${currentKanji.character} (${charData.strokes.length} strokes)`);
           setStrokeData(charData.strokes);
         }
       })
-      .catch((error: any) => {
+      .catch((error: Error) => {
         console.warn(`⚠ Failed to pre-load stroke data for ${currentKanji.character}:`, error);
       });
   }, [currentKanji, isHanziWriterLoaded, HanziWriter]);

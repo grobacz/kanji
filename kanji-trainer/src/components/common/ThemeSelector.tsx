@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SwatchIcon, CheckIcon } from '@heroicons/react/24/outline';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from '../../hooks/useTheme';
 import { useFeedback } from '../../hooks/useFeedback';
 
 const ThemeSelector: React.FC = () => {

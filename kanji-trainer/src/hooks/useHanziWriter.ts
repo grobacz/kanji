@@ -1,8 +1,33 @@
 import { useEffect, useState } from 'react';
 
+interface HanziWriter {
+  create: (container: HTMLElement, character: string, options: HanziWriterOptions) => HanziWriterInstance;
+  loadCharacterData: (character: string) => Promise<{ strokes?: string[] }>;
+}
+
+interface HanziWriterOptions {
+  width?: number;
+  height?: number;
+  padding?: number;
+  strokeAnimationSpeed?: number;
+  delayBetweenStrokes?: number;
+  showOutline?: boolean;
+  showCharacter?: boolean;
+  strokeColor?: string;
+  radicalColor?: string;
+  outlineColor?: string;
+  drawingColor?: string;
+  onLoadCharDataSuccess?: (charData: { strokes?: string[] }) => void;
+  onLoadCharDataError?: (error: Error) => void;
+}
+
+interface HanziWriterInstance {
+  animateCharacter: (options: { onComplete: () => void }) => void;
+}
+
 declare global {
   interface Window {
-    HanziWriter: any;
+    HanziWriter: HanziWriter;
   }
 }
 
